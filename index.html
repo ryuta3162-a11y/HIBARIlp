@@ -195,8 +195,9 @@
                                     <p class="text-center">溶岩浴：インストラクター不在の溶岩スタジオ内で、ゆっくりとお休みいただくお時間です。</p>
                                 </div>
                             </div>
-                            <input type="text" name="lesson_datetime" class="form-input mt-4" placeholder="例: 9月16日 10:00〜" required>
-                             <p class="text-xs text-gray-500 mt-2">※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。<br>※体験当日はレッスン開始15分前には店頭にお越しいただき、インターフォンを押してください。</p>
+                            <!-- 修正: プレースホルダーを「〇月〇日 10:00〜」形式に変更 -->
+                            <input type="text" name="lesson_datetime" class="form-input mt-4" placeholder="例: 〇月〇日 10:00〜" required>
+                             <p class="text-xs text-gray-500 mt-2">※日付と開始時間を入力してください。<br>※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。<br>※体験当日はレッスン開始15分前には店頭にお越しいただき、インターフォンを押してください。</p>
                         </div>
                         <div>
                             <label class="form-label">ご参加希望人数 ※2名様まで<span class="required-mark">*</span></label>
@@ -422,15 +423,16 @@
                         <div class="space-y-4 pt-4 border-t">
                              <div>
                                 <label for="pilates-date-1" class="form-label">第1希望日時<span class="required-mark">*</span></label>
-                                <input type="text" id="pilates-date-1" name="preferred_date_1" class="form-input" placeholder="例: 9月16日 10:00〜" required>
+                                <!-- 修正: プレースホルダーを「〇月〇日 10:00〜」形式に変更 -->
+                                <input type="text" id="pilates-date-1" name="preferred_date_1" class="form-input" placeholder="例: 〇月〇日 10:00〜" required>
                              </div>
                              <div>
                                 <label for="pilates-date-2" class="form-label">第2希望日時</label>
-                                <input type="text" id="pilates-date-2" name="preferred_date_2" class="form-input" placeholder="例: 9月17日 14:00〜">
+                                <input type="text" id="pilates-date-2" name="preferred_date_2" class="form-input" placeholder="例: 〇月〇日 14:00〜">
                              </div>
                              <div>
                                 <label for="pilates-date-3" class="form-label">第3希望日時</label>
-                                <input type="text" id="pilates-date-3" name="preferred_date_3" class="form-input" placeholder="例: 9月18日 19:00〜">
+                                <input type="text" id="pilates-date-3" name="preferred_date_3" class="form-input" placeholder="例: 〇月〇日 19:00〜">
                              </div>
                         </div>
                          <div>
@@ -487,8 +489,9 @@
                                 <p class="text-sm text-center mb-3">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
                                 <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block text-center bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors shadow-sm">最新のレッスンプログラムはこちら</a>
                             </div>
-                            <input type="text" id="hiatus-datetime" name="lesson_datetime" class="form-input mt-4" placeholder="例: 9月16日 10:00〜" required>
-                            <p class="text-xs text-gray-500 mt-2">※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。</p>
+                            <!-- 修正: プレースホルダーを「〇月〇日 10:00〜」形式に変更 -->
+                            <input type="text" id="hiatus-datetime" name="lesson_datetime" class="form-input mt-4" placeholder="例: 〇月〇日 10:00〜" required>
+                            <p class="text-xs text-gray-500 mt-2">※日付と開始時間を入力してください。<br>※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。</p>
                         </div>
                          <div>
                             <label for="hiatus-remarks" class="form-label">ご質問・備考</label>
@@ -987,14 +990,14 @@
                 const form = e.target;
                 
                 // ホットヨガ体験フォームの場合、住所を結合する
-                // 修正: formの親要素の親要素がidを持っている、またはclosestを使う
                 if (form.closest('#form-trial')) { 
+                    const zipcode = form.querySelector('#trial-zipcode').value; // 追加: 郵便番号取得
                     const address1 = form.querySelector('#trial-address1').value;
                     const address2 = form.querySelector('#trial-address2').value;
-                    // 修正: 'address' から '住所' に変更
                     const combinedAddressInput = form.querySelector('input[name="住所"]');
                     if(combinedAddressInput) {
-                        combinedAddressInput.value = address1 + address2;
+                        // 修正: 郵便番号を含めて結合する
+                        combinedAddressInput.value = `〒${zipcode} ${address1}${address2}`;
                     }
                 }
                 
