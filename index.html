@@ -79,6 +79,29 @@
             margin-bottom: 1.5rem;
             border-radius: 0.25rem;
         }
+        /* ラジオボタンリストのスタイル */
+        .radio-list-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .radio-list-item:hover {
+            background-color: #f9fafb;
+        }
+        .radio-list-item input[type="radio"] {
+            margin-top: 0.25rem;
+            margin-right: 0.75rem;
+        }
+        .radio-list-item.disabled {
+            background-color: #f3f4f6;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -141,7 +164,6 @@
                     </header>
                     <div class="text-gray-700 text-sm space-y-4">
                         <p>この度は当館レッスンのご体験をご検討いただき、誠にありがとうございます。</p>
-                        <!-- 修正: 【アンケート】を削除 -->
                         <p>必ずご来館前に、<strong class="font-semibold">【同意書】【緊急連絡先】</strong>のご入力・送信までお済ませくださいますようお願い申し上げます。<br>ご入力内容が確認できない場合、体験をご案内できかねますので、予めご了承ください。</p>
                         <p>すでに当フォームを送信済みで、日程や人数の変更をご希望の方は、再度ご入力と送信をお願いいたします。その際、「ご質問・備考」欄に、ご希望日程変更や人数変更の旨をご入力ください。</p>
                         <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-xs">
@@ -221,7 +243,6 @@
                                 <label for="trial-address2" class="text-xs text-gray-600">番地・建物名など</label>
                                 <input type="text" id="trial-address2" class="form-input" placeholder="例: 谷戸町2-3-7 フレスポ2F" required>
                             </div>
-                            <!-- 修正: name属性を 'address' から '住所' に変更 (スプレッドシートのヘッダー名に合わせるため) -->
                             <input type="hidden" name="住所">
                         </div>
                         <div>
@@ -245,8 +266,7 @@
                                     <li>レッスン後に下着を入れるビニール袋</li>
                                     <li>本人確認書類（免許証等、現住所が分かる物）</li>
                                     <li>クレジットカード</li>
-                                    <!-- 修正: 靴下の表記を変更 -->
-                                    <li>滑り止め付き靴下（税込660円 ※ピラティスリフォーマー体験の方のみ）</li>
+                                    <li>滑り止め付き靴下（税込<span class="text-red-600 font-bold">660円</span> ※ピラティスリフォーマー体験の方のみ）</li>
                                 </ul>
                                 <p>※手ぶら体験実施中は、下記ご用意がございます(手ぶら体験時以外はご持参ください)</p>
                                 <ul class="list-disc list-inside space-y-1">
@@ -286,43 +306,54 @@
                         <p>ご予約済みのレッスンや体験のキャンセルはこちらから申請してください。</p>
                         <p class="info-box">直前のキャンセルの場合は、お電話にてご連絡いただけますと幸いです。</p>
                     </div>
-                    <form class="mt-8 space-y-6">
-                        <input type="hidden" name="formType" value="cancel_request">
+                    <div class="mt-8 space-y-6">
+                        <!-- 検索用フォームエリア -->
                         <div>
-                            <label for="cancel-email" class="form-label">メールアドレス<span class="required-mark">*</span></label>
-                            <input type="email" id="cancel-email" name="email" class="form-input" required>
+                            <label for="search-email" class="form-label">ご予約時のメールアドレス<span class="required-mark">*</span></label>
+                            <div class="flex gap-2">
+                                <input type="email" id="search-email" class="form-input" placeholder="example@email.com" required>
+                                <button type="button" id="btn-search-reservation" class="whitespace-nowrap bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors">
+                                    予約を確認
+                                </button>
+                            </div>
+                            <p id="search-status" class="text-sm mt-2 text-brand-teal font-bold hidden">検索中...</p>
+                            <p id="search-error" class="text-sm mt-2 text-red-500 hidden"></p>
                         </div>
-                        <div>
-                            <label for="cancel-memberId" class="form-label">会員番号（会員様のみ）</label>
-                            <input type="text" id="cancel-memberId" name="memberId" class="form-input" placeholder="1342から始まる10桁の番号">
+
+                        <!-- 検索結果表示エリア -->
+                        <div id="reservation-result-area" class="hidden border-t pt-6">
+                            <form id="cancel-submit-form">
+                                <input type="hidden" name="formType" value="cancel_request">
+                                <!-- 隠しフィールド：検索で特定された情報を送信 -->
+                                <input type="hidden" name="targetSheet" id="target-sheet">
+                                <input type="hidden" name="targetRow" id="target-row">
+                                <input type="hidden" name="cancel_type" id="target-type">
+                                <input type="hidden" name="cancel_datetime" id="target-datetime">
+                                <input type="hidden" name="email" id="target-email">
+                                <input type="hidden" name="name" id="target-name">
+
+                                <h3 class="font-bold mb-4">キャンセルする予約を選択してください</h3>
+                                <div id="reservation-list" class="space-y-2">
+                                    <!-- JSでリストを生成 -->
+                                </div>
+
+                                <div class="mt-6">
+                                    <label for="cancel-reason" class="form-label">備考・理由（任意）</label>
+                                    <textarea id="cancel-reason" name="remarks" rows="3" class="form-input" placeholder="差し支えなければキャンセルの理由をご記入ください。"></textarea>
+                                </div>
+
+                                <div class="text-center mt-8 flex justify-center gap-4">
+                                    <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
+                                    <button type="submit" id="btn-cancel-submit" class="bg-red-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>キャンセル申請する</button>
+                                </div>
+                            </form>
                         </div>
-                        <div>
-                            <label for="cancel-name" class="form-label">氏名<span class="required-mark">*</span></label>
-                            <input type="text" id="cancel-name" name="name" class="form-input" required>
-                        </div>
-                        <div>
-                            <label class="form-label">キャンセルする予約の種類<span class="required-mark">*</span></label>
-                            <select name="cancel_type" class="form-input" required>
-                                <option value="" disabled selected>選択してください</option>
-                                <option value="体験レッスン">体験レッスン</option>
-                                <option value="ピラティスリフォーマー">ピラティスリフォーマー</option>
-                                <option value="休会中レッスン">休会中レッスン</option>
-                                <option value="その他">その他</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="cancel-datetime" class="form-label">キャンセルする予約日時<span class="required-mark">*</span></label>
-                            <input type="text" id="cancel-datetime" name="cancel_datetime" class="form-input" placeholder="例: 9月16日 10:00〜" required>
-                        </div>
-                        <div>
-                            <label for="cancel-reason" class="form-label">備考・理由（任意）</label>
-                            <textarea id="cancel-reason" name="remarks" rows="3" class="form-input" placeholder="差し支えなければキャンセルの理由をご記入ください。"></textarea>
-                        </div>
-                        <div class="text-center mt-8 flex justify-center gap-4">
+
+                        <!-- 検索前の戻るボタン -->
+                        <div id="pre-search-actions" class="text-center mt-8">
                             <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
-                            <button type="submit" class="bg-red-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-colors">送信</button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </section>
 
@@ -688,6 +719,10 @@
             const backButtons = document.querySelectorAll('.back-to-menu');
             const responseMessage = document.getElementById('response-message');
             const fabBackToMenu = document.getElementById('fab-back-to-menu');
+            
+            // ★ ここに、ひばりが丘店で新しくデプロイしたウェブアプリのURLを設定してください ★
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nKZyZU2MyBWdE0lnoBA8LCwcAVvHZ/exec';
+
 
             // フォームを表示する関数
             function showForm(formId) {
@@ -707,6 +742,16 @@
                 pageTop.style.display = 'block';
                 fabBackToMenu.classList.add('hidden');
                 window.scrollTo(0, 0);
+                
+                // 検索結果のリセット
+                const resultArea = document.getElementById('reservation-result-area');
+                const preSearch = document.getElementById('pre-search-actions');
+                const searchEmail = document.getElementById('search-email');
+                if(resultArea) resultArea.classList.add('hidden');
+                if(preSearch) preSearch.classList.remove('hidden');
+                if(searchEmail) searchEmail.value = '';
+                document.getElementById('search-status').classList.add('hidden');
+                document.getElementById('search-error').classList.add('hidden');
             }
 
             menu.addEventListener('click', function(e) {
@@ -820,6 +865,121 @@
                     });
                 });
             }
+            
+            
+            // ▼▼▼ 予約検索・キャンセル機能 ▼▼▼
+            const btnSearch = document.getElementById('btn-search-reservation');
+            if (btnSearch) {
+                btnSearch.addEventListener('click', function() {
+                    const email = document.getElementById('search-email').value;
+                    const statusText = document.getElementById('search-status');
+                    const errorText = document.getElementById('search-error');
+                    
+                    if (!email) {
+                        errorText.textContent = 'メールアドレスを入力してください。';
+                        errorText.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    errorText.classList.add('hidden');
+                    statusText.classList.remove('hidden');
+                    statusText.textContent = '予約を検索しています...';
+                    btnSearch.disabled = true;
+
+                    // GASへ検索リクエスト送信
+                    const formData = new FormData();
+                    formData.append('action', 'search');
+                    formData.append('email', email);
+                    
+                    fetch(webAppUrl, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(text => {
+                        try {
+                            const data = JSON.parse(text);
+                            if (data.result === 'success') {
+                                displayReservations(data.reservations);
+                            } else {
+                                throw new Error(data.message || '検索に失敗しました');
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            errorText.textContent = '予約が見つかりませんでした。';
+                            errorText.classList.remove('hidden');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        errorText.textContent = '通信エラーが発生しました。';
+                        errorText.classList.remove('hidden');
+                    })
+                    .finally(() => {
+                        statusText.classList.add('hidden');
+                        btnSearch.disabled = false;
+                    });
+                });
+            }
+            
+            function displayReservations(reservations) {
+                const listArea = document.getElementById('reservation-list');
+                const resultArea = document.getElementById('reservation-result-area');
+                const preSearch = document.getElementById('pre-search-actions');
+                const submitBtn = document.getElementById('btn-cancel-submit');
+                
+                listArea.innerHTML = '';
+                submitBtn.disabled = true;
+                
+                if (reservations.length === 0) {
+                    listArea.innerHTML = '<p class="text-center text-gray-500 py-4">該当する予約は見つかりませんでした。</p>';
+                } else {
+                    reservations.forEach((res, index) => {
+                        const isCancelled = res.status && res.status.includes('キャンセル');
+                        const item = document.createElement('div');
+                        item.className = `radio-list-item ${isCancelled ? 'disabled' : ''}`;
+                        
+                        // 表示用日付フォーマット
+                        let dateDisplay = res.datetime;
+                        if(dateDisplay instanceof Date) {
+                             dateDisplay = new Date(dateDisplay).toLocaleString();
+                        }
+
+                        const content = `
+                            <label class="flex items-start w-full cursor-pointer">
+                                <input type="radio" name="selected_reservation" value="${index}" ${isCancelled ? 'disabled' : ''}>
+                                <div class="flex-1">
+                                    <p class="font-bold ${isCancelled ? 'text-gray-500 line-through' : 'text-gray-800'}">
+                                        【${res.type}】 ${dateDisplay}
+                                    </p>
+                                    <p class="text-xs text-gray-500">名前: ${res.name}</p>
+                                    ${isCancelled ? '<p class="text-xs text-red-500 font-bold mt-1">※キャンセル済み</p>' : ''}
+                                </div>
+                            </label>
+                        `;
+                        item.innerHTML = content;
+                        
+                        // ラジオボタン変更時のイベント
+                        item.querySelector('input').addEventListener('change', function() {
+                            if (this.checked) {
+                                document.getElementById('target-sheet').value = res.sheet;
+                                document.getElementById('target-row').value = res.row;
+                                document.getElementById('target-type').value = res.type;
+                                document.getElementById('target-datetime').value = res.datetime;
+                                document.getElementById('target-email').value = res.email;
+                                document.getElementById('target-name').value = res.name;
+                                submitBtn.disabled = false;
+                            }
+                        });
+                        
+                        listArea.appendChild(item);
+                    });
+                }
+                
+                preSearch.classList.add('hidden');
+                resultArea.classList.remove('hidden');
+            }
+
 
             // 全てのフォームの送信処理
             formsContainer.addEventListener('submit', function(e) {
@@ -827,7 +987,8 @@
                 const form = e.target;
                 
                 // ホットヨガ体験フォームの場合、住所を結合する
-                if (form.parentElement.id === 'form-trial') {
+                // 修正: formの親要素の親要素がidを持っている、またはclosestを使う
+                if (form.closest('#form-trial')) { 
                     const address1 = form.querySelector('#trial-address1').value;
                     const address2 = form.querySelector('#trial-address2').value;
                     // 修正: 'address' から '住所' に変更
@@ -835,6 +996,12 @@
                     if(combinedAddressInput) {
                         combinedAddressInput.value = address1 + address2;
                     }
+                }
+                
+                // キャンセル送信の場合、action=cancel_submitを追加する
+                let formData = new FormData(form);
+                if (form.id === 'cancel-submit-form') {
+                    formData.append('action', 'cancel_submit');
                 }
 
                 const submitButton = form.querySelector('button[type="submit"]');
@@ -848,7 +1015,7 @@
 
                 fetch(webAppUrl, {
                     method: 'POST',
-                    body: new FormData(form),
+                    body: formData,
                 })
                 .then(response => response.text()) // サーバーからの応答をまずテキストとして受け取る
                 .then(text => {
@@ -856,6 +1023,14 @@
                         const data = JSON.parse(text); // テキストをJSONとして解析
                         if (data.result === 'success') {
                             form.reset();
+                            
+                            // キャンセルフォームのリセット処理追加
+                            if (form.id === 'cancel-submit-form') {
+                                document.getElementById('reservation-result-area').classList.add('hidden');
+                                document.getElementById('pre-search-actions').classList.remove('hidden');
+                                document.getElementById('search-email').value = '';
+                            }
+
                             if (form.parentElement.id === 'form-lost') {
                                 // フォームリセット後にフィールドを再度非表示/無効化
                                 const lostForm = document.getElementById('form-lost');
