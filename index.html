@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOYFIT YOGA フレスポひばりが丘 各種申請専用ページ</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f0fdfa; /* teal-50 */
+        }
+        .brand-teal { color: #008374; }
+        .bg-brand-teal { background-color: #008374; }
+        .hover\:bg-brand-teal-dark:hover { background-color: #006a5f; }
+        
+        /* フォームセクションの切り替えアニメーション */
+        .form-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-section.active {
+            display: block;
+        }
+
+        /* カスタムスタイル */
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+        }
+        .menu-button {
+            transition: all 0.3s ease;
+        }
+        .menu-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px -2px rgb(0 0 0 / 0.15);
+        }
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.05);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #008374;
+            box-shadow: 0 0 0 3px rgba(0, 131, 116, 0.2);
+        }
+        .form-input:disabled, .form-input[readonly] {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+        .required-mark {
+            color: #ef4444;
+            margin-left: 0.25rem;
+        }
+        .info-box {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="min-h-screen container mx-auto p-4 sm:p-6 md:p-8">
+        
+        <div id="page-top" class="card max-w-2xl mx-auto">
+            <div class="p-8 sm:p-12 text-center">
+                <header>
+                    <img src="yoga.jpg" alt="JOYFIT YOGA フレスポひばりが丘 ロゴ" class="mx-auto mb-6 h-20 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/200x80/ffffff/008374?text=YOGA+Hibari';">
+                    <h1 class="text-3xl font-bold brand-teal">各種申請専用ページ</h1>
+                    <p class="mt-2 text-gray-600">JOYFIT YOGA フレスポひばりが丘</p>
+                </header>
+
+                <nav id="form-menu" class="mt-12 flex flex-col gap-8">
+                    <!-- 未入会者様向けメニュー -->
+                    <div>
+                        <h3 class="text-lg font-bold brand-teal mb-4 pb-2 border-b-2 border-teal-200 text-center">初めてご利用の方</h3>
+                        <div class="grid grid-cols-1 gap-5 mt-4">
+                            <button data-form="form-trial" class="menu-button w-full font-bold p-6 rounded-xl bg-brand-teal text-white hover:bg-brand-teal-dark text-xl text-center transition-all duration-300 ease-in-out transform hover:scale-105">
+                                ▶ スタジオレッスン体験
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 既存会員様向けメニュー -->
+                    <div>
+                        <h3 class="text-lg font-bold text-lime-800 mb-3 pb-2 border-b-2 border-lime-400 text-center">各種お手続き</h3>
+                        
+                        <!-- Pilates Reformer Button -->
+                        <div class="mb-6 mt-4">
+                             <button data-form="form-pilates" class="menu-button w-full font-bold p-6 rounded-xl text-lime-800 bg-lime-200 border-2 border-lime-400 hover:bg-lime-300 hover:border-lime-500 shadow-lg text-xl text-center transition-all duration-300 ease-in-out transform hover:scale-105">
+                                ▶ ピラティスリフォーマー パーソナル予約
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <button data-form="form-cancel" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-red-50 border border-red-200 text-red-700 hover:border-red-400 hover:bg-red-100 text-center">▶ レッスン予約キャンセル</button>
+                            <button data-form="form-hiatus" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ 休会中1回受講予約</button>
+                            <button data-form="form-lost" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ 忘れ物お問い合わせ</button>
+                            <button data-form="form-este" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ セルフエステ利用申請</button>
+                            <button data-form="form-card" class="menu-button w-full font-semibold py-2 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center flex flex-col justify-center">
+                                <span class="text-xs text-gray-500 -mb-1">※新規入会者用</span>
+                                <span>▶ 会員証発行</span>
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 各種フォームコンテナ -->
+        <div id="forms-container" class="max-w-2xl mx-auto mt-8">
+            
+            <!-- ▼ 1. スタジオレッスン体験フォーム ▼ -->
+            <section id="form-trial" class="form-section card">
+                <div class="p-8 sm:p-12">
+                    <header class="text-center mb-8">
+                        <h2 class="text-2xl font-bold brand-teal">スタジオレッスン体験</h2>
+                    </header>
+                    <div class="text-gray-700 text-sm space-y-4">
+                        <p>この度は当館レッスンのご体験をご検討いただき、誠にありがとうございます。</p>
+                        <!-- 修正: 【アンケート】を削除 -->
+                        <p>必ずご来館前に、<strong class="font-semibold">【同意書】【緊急連絡先】</strong>のご入力・送信までお済ませくださいますようお願い申し上げます。<br>ご入力内容が確認できない場合、体験をご案内できかねますので、予めご了承ください。</p>
+                        <p>すでに当フォームを送信済みで、日程や人数の変更をご希望の方は、再度ご入力と送信をお願いいたします。その際、「ご質問・備考」欄に、ご希望日程変更や人数変更の旨をご入力ください。</p>
+                        <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-xs">
+                           <p class="font-bold">※ピラティスリフォーマー体験予約ご希望の方へ</p>
+                           <p>ご希望日の<strong>2日前23:59まで</strong>にお済ませください。過ぎてしまった場合は体験のご案内ができかねます。</p>
+                        </div>
+                        <p class="info-box">ご入力いただいた内容をメールにて自動送信いたします。メールアドレスをご入力ください。</p>
+                    </div>
+                    <form class="mt-8 space-y-6">
+                        <input type="hidden" name="formType" value="trial_lesson">
+                        <div>
+                            <label for="trial-email" class="form-label">メールアドレス<span class="required-mark">*</span></label>
+                            <input type="email" id="trial-email" name="email" class="form-input" required>
+                        </div>
+                        <div class="p-4 border rounded-lg">
+                            <label class="form-label">同意書<span class="required-mark">*</span></label>
+                            <p class="text-xs mb-3">私は健康上の不都合がない為、JOYFIT YOGAフレスポひばりが丘にて体験に参加致します。万が一、事故及びケガ等を負った場合は、自らの責任と致します。</p>
+                            <label class="flex items-center"><input type="checkbox" name="consent" value="同意します" class="mr-2" required>同意します</label>
+                            <p class="text-xs text-gray-500 mt-1">※同意いただけない場合、ご体験いただくことはできません。</p>
+                        </div>
+                        <div>
+                            <label class="form-label">体験希望日<span class="required-mark">*</span></label>
+                            <div class="p-4 bg-gray-50 rounded-lg border text-sm space-y-3">
+                                <p class="text-center">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
+                                <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block text-center bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors shadow-sm">最新のレッスンプログラムはこちら</a>
+                                <div class="text-xs">
+                                    <p class="font-bold text-center">【★の数で強度が異なります】</p>
+                                    <p class="text-center">★：初心者向け／★★：中級者向け／★★★：上級者向け</p>
+                                    <p class="text-center">溶岩浴：インストラクター不在の溶岩スタジオ内で、ゆっくりとお休みいただくお時間です。</p>
+                                </div>
+                            </div>
+                            <input type="text" name="lesson_datetime" class="form-input mt-4" placeholder="例: 9月16日 10:00〜" required>
+                             <p class="text-xs text-gray-500 mt-2">※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。<br>※体験当日はレッスン開始15分前には店頭にお越しいただき、インターフォンを押してください。</p>
+                        </div>
+                        <div>
+                            <label class="form-label">ご参加希望人数 ※2名様まで<span class="required-mark">*</span></label>
+                             <div class="flex gap-4">
+                                <label class="flex items-center"><input type="radio" name="participants" value="1名" class="mr-2" required>1名</label>
+                                <label class="flex items-center"><input type="radio" name="participants" value="2名" class="mr-2">2名</label>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">※ピラティスリフォーマー・筋膜リリースヨガ・ホイールを使用するヨгаをご希望の場合、2名様以上でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。</p>
+                        </div>
+                         <div>
+                            <label for="trial-name" class="form-label">氏名<span class="required-mark">*</span></label>
+                            <input type="text" id="trial-name" name="name" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="trial-furigana" class="form-label">ふりがな<span class="required-mark">*</span></label>
+                            <input type="text" id="trial-furigana" name="furigana" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="trial-birthdate" class="form-label">生年月日<span class="required-mark">*</span></label>
+                            <input type="date" id="trial-birthdate" name="birthdate" class="form-input" required>
+                            <p class="text-xs text-gray-500 mt-2">※カレンダーが表示される場合、年号をタップしていただくと過去の年の一覧が表示されます。</p>
+                        </div>
+                        <div>
+                             <label for="trial-age" class="form-label">ご年齢<span class="required-mark">*</span></label>
+                            <input type="number" id="trial-age" name="age" class="form-input" required readonly placeholder="自動計算されます">
+                        </div>
+                        <div>
+                            <label class="form-label">ご住所<span class="required-mark">*</span></label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="sm:col-span-2">
+                                    <label for="trial-zipcode" class="text-xs text-gray-600">郵便番号 (ハイフンなし)</label>
+                                    <input type="text" id="trial-zipcode" class="form-input" placeholder="例: 1880001" pattern="\d{7}">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-600">&nbsp;</label>
+                                    <button type="button" id="search-address-btn" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors h-full text-sm">住所検索</button>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <label for="trial-address1" class="text-xs text-gray-600">都道府県・市区町村・町名</label>
+                                <input type="text" id="trial-address1" class="form-input" readonly>
+                            </div>
+                            <div class="mt-4">
+                                <label for="trial-address2" class="text-xs text-gray-600">番地・建物名など</label>
+                                <input type="text" id="trial-address2" class="form-input" placeholder="例: 谷戸町2-3-7 フレスポ2F" required>
+                            </div>
+                            <!-- 修正: name属性を 'address' から '住所' に変更 (スプレッドシートのヘッダー名に合わせるため) -->
+                            <input type="hidden" name="住所">
+                        </div>
+                        <div>
+                             <label for="trial-phone" class="form-label">電話番号<span class="required-mark">*</span></label>
+                            <input type="tel" id="trial-phone" name="phone" class="form-input" required>
+                        </div>
+                        <div>
+                             <label for="trial-emergency-name" class="form-label">緊急連絡先のお名前(続柄)<span class="required-mark">*</span></label>
+                            <input type="text" id="trial-emergency-name" name="emergency_name" class="form-input" placeholder="記入例：山田花子(母)" required>
+                        </div>
+                         <div>
+                             <label for="trial-emergency-phone" class="form-label">緊急連絡先の電話番号<span class="required-mark">*</span></label>
+                            <input type="tel" id="trial-emergency-phone" name="emergency_phone" class="form-input" required>
+                        </div>
+                        <div class="p-4 border rounded-lg bg-gray-50">
+                            <label class="form-label">下記説明をご確認ください。<span class="required-mark">*</span></label>
+                             <div class="text-xs space-y-3 text-gray-600 max-h-40 overflow-y-auto pr-2">
+                                <p class="font-bold">■ 体験時のお持ち物 ■</p>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>汗をかくため、替えの下着</li>
+                                    <li>レッスン後に下着を入れるビニール袋</li>
+                                    <li>本人確認書類（免許証等、現住所が分かる物）</li>
+                                    <li>クレジットカード</li>
+                                    <!-- 修正: 靴下の表記を変更 -->
+                                    <li>滑り止め付き靴下（税込660円 ※ピラティスリフォーマー体験の方のみ）</li>
+                                </ul>
+                                <p>※手ぶら体験実施中は、下記ご用意がございます(手ぶら体験時以外はご持参ください)</p>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>飲料水500㎖（500㎖以上必要な場合はご持参ください。店内販売は行っておりません）</li>
+                                    <li>ウェア上下（動きやすい服装）</li>
+                                    <li>レンタルフェイスタオル1枚</li>
+                                </ul>
+                                <p>※乗り物酔いしやすい方は、ピラティスリフォーマー使用時に酔ってしまう可能性がございます。ご注意の上、お申込みください。</p>
+                                
+                                <p class="font-bold pt-2">■ 体験当日の流れ ■</p>
+                                <a href="https://drive.google.com/file/d/1xhW-de7ugrImJGy8r--8lR2rQ6ESgXlg/view" target="_blank" class="text-blue-600 underline hover:text-blue-800">入館～体験～退館の流れ</a>
+
+                                <p class="font-bold pt-2">■ 体験後、入会手続きに移行する場合 ■</p>
+                                <p>書類に同封された「ご入会方法」をご確認の上、WEB上でお手続きください。会員証発行のため「&lt;WEB入会済みの方専用&gt;会員証発行予約フォーム」のご入力・送信もお願いいたします。また、入会後にご来館の際、防犯用の写真撮影をさせていただきます。<br>※会費のお支払い方法はデビットカード・クレジットカードのみ可能でございます。口座振替・現金でのお支払いはできかねますので予めご了承ください。</p>
+                            </div>
+                            <label class="flex items-center mt-3"><input type="checkbox" name="read_confirmation" value="確認しました" class="mr-2" required>確認しました</label>
+                        </div>
+                        <div>
+                            <label for="trial-remarks" class="form-label">ご質問・備考</label>
+                            <textarea id="trial-remarks" name="remarks" rows="4" class="form-input" placeholder="ご不明点等ございましたらご入力ください。日程や人数変更をご希望の場合、その旨をご入力ください。"></textarea>
+                        </div>
+                        <div class="text-center mt-8 flex justify-center gap-4">
+                            <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
+                            <button type="submit" class="bg-brand-teal text-white font-bold py-3 px-8 rounded-lg hover:bg-brand-teal-dark transition-colors">送信</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ▼ 新規: キャンセル申請フォーム ▼ -->
+            <section id="form-cancel" class="form-section card">
+                <div class="p-8 sm:p-12">
+                    <header class="text-center mb-8">
+                        <h2 class="text-2xl font-bold text-red-600">レッスン予約キャンセル申請</h2>
+                    </header>
+                    <div class="text-gray-700 text-sm space-y-4">
+                        <p>ご予約済みのレッスンや体験のキャンセルはこちらから申請してください。</p>
+                        <p class="info-box">直前のキャンセルの場合は、お電話にてご連絡いただけますと幸いです。</p>
+                    </div>
+                    <form class="mt-8 space-y-6">
+                        <input type="hidden" name="formType" value="cancel_request">
+                        <div>
+                            <label for="cancel-email" class="form-label">メールアドレス<span class="required-mark">*</span></label>
+                            <input type="email" id="cancel-email" name="email" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="cancel-memberId" class="form-label">会員番号（会員様のみ）</label>
+                            <input type="text" id="cancel-memberId" name="memberId" class="form-input" placeholder="1342から始まる10桁の番号">
+                        </div>
+                        <div>
+                            <label for="cancel-name" class="form-label">氏名<span class="required-mark">*</span></label>
+                            <input type="text" id="cancel-name" name="name" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">キャンセルする予約の種類<span class="required-mark">*</span></label>
+                            <select name="cancel_type" class="form-input" required>
+                                <option value="" disabled selected>選択してください</option>
+                                <option value="体験レッスン">体験レッスン</option>
+                                <option value="ピラティスリフォーマー">ピラティスリフォーマー</option>
+                                <option value="休会中レッスン">休会中レッスン</option>
+                                <option value="その他">その他</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="cancel-datetime" class="form-label">キャンセルする予約日時<span class="required-mark">*</span></label>
+                            <input type="text" id="cancel-datetime" name="cancel_datetime" class="form-input" placeholder="例: 9月16日 10:00〜" required>
+                        </div>
+                        <div>
+                            <label for="cancel-reason" class="form-label">備考・理由（任意）</label>
+                            <textarea id="cancel-reason" name="remarks" rows="3" class="form-input" placeholder="差し支えなければキャンセルの理由をご記入ください。"></textarea>
+                        </div>
+                        <div class="text-center mt-8 flex justify-center gap-4">
+                            <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
+                            <button type="submit" class="bg-red-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition-colors">送信</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ▼ 2. ピラティスリフォーマー予約 ▼ -->
+            <section id="form-pilates" class="form-section card">
+                <div class="p-8 sm:p-12">
+                    <header class="text-center mb-8">
+                        <h2 class="text-2xl font-bold brand-teal">ピラティスリフォーマー パーソナルレッスン予約</h2>
+                    </header>
+                    <div class="text-gray-700 text-sm space-y-4">
+                         <p>ピラティスリフォーマーパーソナルレッスンのご予約は、プログラム内、黄色の「パーソナル　要予約」枠もしくは緑色の「ピラティスリフォーマーグループレッスン」枠のいずれかから日程をお選びください。</p>
+                         <p>ご予約は第3希望日までご入力ください。</p>
+                         <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-xs space-y-2">
+                              <p>※黄色「パーソナル 要予約」枠はご希望日の<strong class="font-semibold">1週間前まで</strong>にお済ませください。<br>例：7月14日(月)に予約希望の場合、7月7日(月)23:59までにご予約。</p>
+                              <p>※緑色「ピラティスリフォーマーグループレッスン」枠は<strong class="font-semibold">前月15日（営業時間内）まで</strong>にお済ませください。<br>例：8月中の緑色枠予約希望の場合、7月15日（火）22:00までにご予約。</p>
+                         </div>
+                         <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                            <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors shadow-sm">最新のレッスンプログラムはこちら</a>
+                         </div>
+                         <p class="info-box">【料金(税込)】<br>30分間：3,300円／60分間：6,600円<br><span class="text-xs">※翌月の月会費と合算請求させていただきます。※当日はチケットの発券は不要です。</span></p>
+                    </div>
+                    <form class="mt-8 space-y-6">
+                        <input type="hidden" name="formType" value="pilates_reformer">
+                        <div>
+                            <label for="pilates-memberId" class="form-label">会員番号（分かる方のみで構いません）</label>
+                            <input type="text" id="pilates-memberId" name="memberId" class="form-input" placeholder="1342から始まる10桁の番号">
+                        </div>
+                        <div>
+                            <label for="pilates-name" class="form-label">氏名<span class="required-mark">*</span></label>
+                            <input type="text" id="pilates-name" name="name" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="pilates-furigana" class="form-label">ふりがな<span class="required-mark">*</span></label>
+                            <input type="text" id="pilates-furigana" name="furigana" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="pilates-contact" class="form-label">メールアドレス<span class="required-mark">*</span></label>
+                            <input type="email" id="pilates-contact" name="contact_info" class="form-input" required placeholder="予約確定/変更調整のご連絡をさせていただきます。">
+                        </div>
+                         <div>
+                            <label class="form-label">「ピラティリフォーマーパーソナルレッスン30分間無料チケットまたは60分無料チケット」などをご利用ですか？<span class="required-mark">*</span></label>
+                            <div class="flex gap-4">
+                               <label class="flex items-center"><input type="radio" name="use_ticket" value="はい" class="mr-2" required>はい（事前に使用期限をご確認ください）</label>
+                               <label class="flex items-center"><input type="radio" name="use_ticket" value="いいえ" class="mr-2">いいえ</label>
+                           </div>
+                        </div>
+                        <div>
+                            <label class="form-label">レッスン時間<span class="required-mark">*</span></label>
+                            <div class="flex gap-4">
+                               <label class="flex items-center"><input type="radio" name="lesson_duration" value="30分間" class="mr-2" required>30分間</label>
+                               <label class="flex items-center"><input type="radio" name="lesson_duration" value="60分間" class="mr-2">60分間</label>
+                           </div>
+                          <p class="text-xs text-gray-500 mt-2">30分無料チケットを使用して60分間受講することも可能です。その場合はレッスン時間「60分」をご選択ください。料金は30分間の料金3,300円(税込)を頂戴いたします。</p>
+                        </div>
+                         <div>
+                            <label class="form-label">担当希望インストラクター<span class="required-mark">*</span></label>
+                            <select name="instructor" class="form-input" required>
+                                <option value="" disabled selected>選択してください</option>
+                                <option value="midori">midori</option>
+                                <option value="hanako">hanako</option>
+                                <option value="mito">mito</option>
+                                <option value="日程が合えば誰でも">日程が合えば誰でも</option>
+                            </select>
+                        </div>
+                        <!-- 希望日時入力欄 -->
+                        <div class="space-y-4 pt-4 border-t">
+                             <div>
+                                <label for="pilates-date-1" class="form-label">第1希望日時<span class="required-mark">*</span></label>
+                                <input type="text" id="pilates-date-1" name="preferred_date_1" class="form-input" placeholder="例: 9月16日 10:00〜" required>
+                             </div>
+                             <div>
+                                <label for="pilates-date-2" class="form-label">第2希望日時</label>
+                                <input type="text" id="pilates-date-2" name="preferred_date_2" class="form-input" placeholder="例: 9月17日 14:00〜">
+                             </div>
+                             <div>
+                                <label for="pilates-date-3" class="form-label">第3希望日時</label>
+                                <input type="text" id="pilates-date-3" name="preferred_date_3" class="form-input" placeholder="例: 9月18日 19:00〜">
+                             </div>
+                        </div>
+                         <div>
+                             <label class="form-label">予約希望枠はどちらの枠ですか？<span class="required-mark">*</span></label>
+                               <div class="flex gap-4">
+                                  <label class="flex items-center"><input type="radio" name="booking_type" value="黄色枠" class="mr-2" required>黄色枠（ご希望日の1週間前まで予約可能）</label>
+                                  <label class="flex items-center"><input type="radio" name="booking_type" value="緑色枠" class="mr-2">緑色枠（前月15日（営業時間内）まで予約可能）</label>
+                              </div>
+                        </div>
+                        <div class="text-center mt-8 flex justify-center gap-4">
+                           <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
+                           <button type="submit" class="bg-brand-teal text-white font-bold py-3 px-8 rounded-lg hover:bg-brand-teal-dark transition-colors">送信</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ▼ 3. 休会中1回受講予約 ▼ -->
+            <section id="form-hiatus" class="form-section card">
+                <div class="p-8 sm:p-12">
+                    <header class="text-center mb-8">
+                        <h2 class="text-2xl font-bold brand-teal">休会中1回受講予約</h2>
+                    </header>
+                    <div class="text-gray-700 text-sm space-y-4">
+                        <p>ご予約はご希望レッスン日の<strong class="text-red-600">前日（営業時間内）まで</strong>にお済ませください。過ぎてしまった場合・ ご予約が確認できない場合は、ご案内できかねます。予めご了承ください。<br>※前日が休館日の場合は、休館日前までにお済ませください。</p>
+                        <p>すでに当フォームを送信済みで、日程変更をご希望の方は、再度ご入力と送信をお願いいたします。その際、「ご質問・備考」欄に、ご希望日程変更の旨をご入力ください。</p>
+                         <p class="info-box">ご入力いただいた内容をメールにて自動送信いたします。メールアドレスをご入力ください。<br>※予約フォーム送信時すでにご予約が満員の場合は、ご連絡させていただきます。</p>
+                    </div>
+                    <form class="mt-8 space-y-6">
+                        <input type="hidden" name="formType" value="hiatus_lesson">
+                        <div>
+                            <label for="hiatus-email" class="form-label">メールアドレス<span class="required-mark">*</span></label>
+                            <input type="email" id="hiatus-email" name="email" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="hiatus-memberId" class="form-label">会員番号（分かる方のみで構いません）</label>
+                            <input type="text" id="hiatus-memberId" name="memberId" class="form-input" placeholder="1342から始まる10桁の番号">
+                        </div>
+                        <div>
+                            <label for="hiatus-name" class="form-label">氏名<span class="required-mark">*</span></label>
+                            <input type="text" id="hiatus-name" name="name" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="hiatus-furigana" class="form-label">ふりがな<span class="required-mark">*</span></label>
+                            <input type="text" id="hiatus-furigana" name="furigana" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="hiatus-phone" class="form-label">電話番号<span class="required-mark">*</span></label>
+                            <input type="tel" id="hiatus-phone" name="phone" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="hiatus-datetime" class="form-label">希望日時<span class="required-mark">*</span></label>
+                            <div class="p-4 bg-gray-50 rounded-lg border">
+                                <p class="text-sm text-center mb-3">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
+                                <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block text-center bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors shadow-sm">最新のレッスンプログラムはこちら</a>
+                            </div>
+                            <input type="text" id="hiatus-datetime" name="lesson_datetime" class="form-input mt-4" placeholder="例: 9月16日 10:00〜" required>
+                            <p class="text-xs text-gray-500 mt-2">※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。</p>
+                        </div>
+                         <div>
+                            <label for="hiatus-remarks" class="form-label">ご質問・備考</label>
+                            <textarea id="hiatus-remarks" name="remarks" rows="4" class="form-input" placeholder="ご不明点等ございましたらご入力ください。日程変更をご希望の場合、その旨をご入力ください。"></textarea>
+                        </div>
+                         <div class="text-center mt-8 flex justify-center gap-4">
+                           <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
+                           <button type="submit" class="bg-brand-teal text-white font-bold py-3 px-8 rounded-lg hover:bg-brand-teal-dark transition-colors">送信</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ▼ 4. 忘れ物お問い合わせ ▼ -->
+            <section id="form-lost" class="form-section card">
+                 <div class="p-8 sm:p-12">
+                    <header class="text-center mb-8">
+                        <h2 class="text-2xl font-bold brand-teal">忘れ物お問い合わせ</h2>
+                    </header>
+                    <div class="text-gray-700 text-sm space-y-4">
+                        <p>当館でお忘れ物の可能性がある場合は、こちらのフォームでお問い合わせください。</p>
+                        <p class="info-box">お忘れ物は<strong class="font-bold">1ヶ月間</strong>保管しております。その間にお問い合わせや受け取りのためのご来館がなかった場合、処分させていただきます。予めご了承ください。</p>
+                    </div>
+                    <form class="mt-8 space-y-6">
+                        <input type="hidden" name="formType" value="lost_found">
+                        <div>
+                            <label for="lost-memberId" class="form-label">会員番号（分かる方のみで構いません）</label>
+                            <input type="text" id="lost-memberId" name="memberId" class="form-input" placeholder="1342から始まる10桁の番号">
+                        </div>
+                        <div>
+                            <label for="lost-name" class="form-label">氏名<span class="required-mark">*</span></label>
+                            <input type="text" id="lost-name" name="name" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="lost-furigana" class="form-label">ふりがな<span class="required-mark">*</span></label>
+                            <input type="text" id="lost-furigana" name="furigana" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="lost-item" class="form-label">お忘れ物の特徴<span class="required-mark">*</span></label>
+                            <textarea id="lost-item" name="item_description" rows="4" class="form-input" placeholder="似ているお忘れ物が多発しております。なるべく詳しくご入力ください。&#10;例：「黒のフェイスタオル記名あり」「◯◯の化粧水トラベルサイズ」「シルバーのリボン型ヘアクリップ」など" required></textarea>
+                        </div>
+                        <div>
+                            <label for="lost-date" class="form-label">お忘れになったのはいつ頃ですか？<span class="required-mark">*</span></label>
+                            <input type="text" id="lost-date" name="lost_date" class="form-input" placeholder="例：9月10日頃、9月11日 18:00のレッスン後など" required>
+                        </div>
+                        <div>
+                            <label class="form-label">ご連絡方法をご選択ください<span class="required-mark">*</span></label>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <label class="flex items-center"><input type="radio" name="contactMethod" value="phone" class="mr-2" required>電話（留守番電話を含む）</label>
+                                <label class="flex items-center"><input type="radio" name="contactMethod" value="email" class="mr-2">Eメール</label>
+                                <label class="flex items-center"><input type="radio" name="contactMethod" value="visit" class="mr-2">次回来館時にお声がけ</label>
+                            </div>
+                        </div>
+                        <div id="lost-contact-fields" class="space-y-6">
+                            <div id="lost-phone-field" class="hidden">
+                                <label for="lost-phone" class="form-label">電話番号をご入力ください</label>
+                                <input type="tel" id="lost-phone" name="contact_phone" class="form-input" placeholder="ハイフン(-)は不要です">
+                            </div>
+                            <div id="lost-email-field" class="hidden">
+                                <label for="lost-email" class="form-label">メールアドレスをご入力ください</label>
+                                <input type="email" id="lost-email" name="contact_email" class="form-input">
+                                <p class="text-xs text-gray-500 mt-2">※携帯電話の設定により、迷惑メールフォルダに届いてしまう場合もございます。受信フォルダと合わせてご確認ください。<br>※iCloudアドレスですと、当館からのメールが届かない可能性がございます。ご了承ください。</p>
+                            </div>
+                            <div id="lost-visit-field" class="hidden">
+                                <label for="lost-visit-date" class="form-label">次回来館予定日を教えてください（すでにお決まりでしたら）</label>
+                                <input type="text" id="lost-visit-date" name="contact_visit_date" class="form-input" placeholder="例: 9月20日">
+                            </div>
+                        </div>
+                         <div class="text-center mt-8 flex justify-center gap-4">
+                           <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
+                           <button type="submit" class="bg-brand-teal text-white font-bold py-3 px-8 rounded-lg hover:bg-brand-teal-dark transition-colors">送信</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ▼ 5. セルフエステ同意書 ▼ -->
+            <section id="form-este" class="form-section card">
+                <div class="p-8 sm:p-12">
+                    <header class="text-center mb-8">
+                        <h2 class="text-2xl font-bold brand-teal">セルフエステ事前確認兼同意書</h2>
+                    </header>
+                    <div class="text-gray-700 text-sm space-y-4">
+                        <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
+                           <h3 class="font-bold text-base mb-2">【ご利用前の重要なご案内】</h3>
+                           <p>本フォームは、セルフエステをご利用いただく前に、ご自身の体調や施術リスクに関する確認および注意事項への【同意】をお願いするものです。</p>
+                        </div>
+                        <p>以下3つの資料を必ずご確認ください。<br>内容を確認・理解・同意いただけない場合は、ご利用いただけません。</p>
+                        <div class="p-4 border rounded-lg bg-gray-50">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+                                <a href="https://docs.google.com/document/d/19iW-3BlT0bsDVxvWVniGSSaqz2Cka95b/edit?rtpof=true&sd=true&tab=t.0" target="_blank" class="block p-3 bg-white border rounded-lg hover:bg-gray-100 transition-colors font-medium text-gray-700 text-sm">▶ 事前確認兼同意書</a>
+                                <a href="https://docs.google.com/document/d/1wkFUpl2KkHshGitHZc1fgdpByie9giM4Zfs1o-8QTVw/edit?tab=t.0" target="_blank" class="block p-3 bg-white border rounded-lg hover:bg-gray-100 transition-colors font-medium text-gray-700 text-sm">▶ 利用規約</a>
+                                <a href="https://docs.google.com/document/d/1BVEhXeb9sC9YPcTKnUcVXsdSHO1l5FNo/edit?tab=t.0" target="_blank" class="block p-3 bg-white border rounded-lg hover:bg-gray-100 transition-colors font-medium text-gray-700 text-sm">▶ 利用時の注意点</a>
+                            </div>
+                        </div>
+                        <p class="text-xs text-red-600">※操作ミスや体調不良によるトラブルについて当クラブでは一切の責任を負いかねます。必ず全内容に納得いただいたうえで、フォームのご入力をお願いいたします。</p>
+                    </div>
+                    <form class="mt-8 space-y-6">
+                        <input type="hidden" name="formType" value="self_este_consent">
+                        <div>
+                            <label for="este-memberId" class="form-label">会員番号</label>
+                            <input type="text" id="este-memberId" name="memberId" class="form-input" placeholder="1342から始まる10桁の番号">
+                        </div>
+                        <div>
+                            <label for="este-name" class="form-label">氏名<span class="required-mark">*</span></label>
+                            <input type="text" id="este-name" name="name" class="form-input" required>
+                        </div>
+                        <div class="p-4 border border-red-400 bg-red-50 rounded-lg">
+                            <label class="form-label">同意確認<span class="required-mark">*</span></label>
+                            <p class="text-sm mb-3">上記の「事前確認兼同意書」「利用規約」「安全にご利用いただくために」の内容を確認し、理解・納得したうえで、セルフエステの利用に同意されますか？</p>
+                            <label class="flex items-center text-base">
+                                <input type="checkbox" id="este-consent" name="consent" value="同意する" class="h-5 w-5 mr-3 rounded" required>
+                                <strong>同意する</strong>
+                            </label>
+                             <p class="text-xs text-gray-500 mt-2">※同意されない場合は、セルフエステのご利用はできません。</p>
+                        </div>
+                        
+                        <div class="mt-8 border-t pt-6">
+                             <h3 class="font-bold text-center text-lg brand-teal mb-4">利用方法・ご予約について</h3>
+                             <p class="text-center text-sm mb-4">下記リンクより詳細をご確認ください。</p>
+                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-center">
+                                      <a href="https://www.youtube.com/shorts/JwJimk6c0Ks?si=1LSbIHDtFX2QjbAW" target="_blank" class="block p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center justify-center h-16">【セルフエステ】入室～電源操作まで</a>
+                                      <a href="https://www.youtube.com/shorts/gHgozU4YMiU" target="_blank" class="block p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center justify-center h-16">【セルフエステ】片付け～退出まで</a>
+                                      <a href="https://www.youtube.com/shorts/qXXBHeuqZ2g" target="_blank" class="block p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center justify-center h-16">【セルフエステ】お腹編 TRA ウルトラRF</a>
+                                      <a href="https://www.youtube.com/shorts/QAP-9IlOsXI" target="_blank" class="block p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center justify-center h-16">【セルフエステ】二の腕 BODY３種</a>
+                                      <a href="https://www.youtube.com/shorts/5UtKNj6RLmQ?si=NHHqnbMvXtKUCMA6" target="_blank" class="block p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center justify-center h-16">【セルフエステ】太もも SUCTION 吸引 RF</a>
+                                      <a href="https://www.youtube.com/shorts/YWV8hQ25rUU?si=dmEdBHpwjQBJOsE0" target="_blank" class="block p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center justify-center h-16">【セルフエステ】FACE EL EMS ポレーション</a>
+                                      <a href="https://www.youtube.com/shorts/JNfIoZZP7LQ" target="_blank" class="block p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center justify-center h-16">【セルフエステ】足の甲編 FACE RF</a>
+                                      <a href="https://www.youtube.com/shorts/muEGk-IXLT8" target="_blank" class="block p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-xs flex items-center justify-center h-16">【セルフエステ】FACEサーマナイフ</a>
+                             </div>
+                             <div class="mt-6">
+                                      <a href="https://airrsv.net/yogahibarigaoka/calendar" target="_blank" class="block p-4 text-center bg-brand-teal text-white rounded-lg hover:bg-brand-teal-dark transition-colors font-bold">▶ 予約ページはこちら</a>
+                             </div>
+                        </div>
+
+                         <div class="text-center mt-8 flex justify-center gap-4">
+                           <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
+                           <button type="submit" class="bg-brand-teal text-white font-bold py-3 px-8 rounded-lg hover:bg-brand-teal-dark transition-colors">送信</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ▼ 6. 会員証発行 ▼ -->
+            <section id="form-card" class="form-section card">
+                <div class="p-8 sm:p-12">
+                    <header class="text-center mb-8">
+                        <h2 class="text-2xl font-bold brand-teal">&lt;WEB入会済みの方専用&gt;<br>会員証発行予約フォーム</h2>
+                    </header>
+                    <div class="text-gray-700 text-sm space-y-4">
+                        <p>この度はWEB入会をお済ませいただきありがとうございます。<br>お客様の会員証を発行するため、以下の質問事項にご回答をお願いいたします。</p>
+                        <p class="info-box">ご入力いただいた内容をメールにて自動送信いたします。メールアドレスをご入力ください。</p>
+                    </div>
+                    <form class="mt-8 space-y-6">
+                        <input type="hidden" name="formType" value="membership_card">
+                        <div>
+                            <label for="card-email" class="form-label">メールアドレス<span class="required-mark">*</span></label>
+                            <input type="email" id="card-email" name="email" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="card-name" class="form-label">氏名<span class="required-mark">*</span></label>
+                            <input type="text" id="card-name" name="name" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="card-furigana" class="form-label">ふりがな<span class="required-mark">*</span></label>
+                            <input type="text" id="card-furigana" name="furigana" class="form-input" required>
+                        </div>
+                        <div>
+                            <label for="card-phone" class="form-label">電話番号<span class="required-mark">*</span></label>
+                            <input type="tel" id="card-phone" name="phone" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">今回のご入会にあたり、当てはまるものをお選びください。<span class="required-mark">*</span></label>
+                            <select name="enrollment_type" class="form-input" required>
+                                <option value="" disabled selected>選択してください</option>
+                                <option value="復会">復会：過去JOYFITYOGAフレスポひばりが丘の会員だった方。</option>
+                                <option value="乗り換え入会">乗り換え入会：他クラブに現在在籍中、または過去1年間以内に在籍していた事を証明する会員証等の証明資料が提示できる方※JOYFIT他店舗は除く。</option>
+                                <option value="ペア入会">ペア入会：2名以上で同時入会された方。</option>
+                                <option value="紹介入会">紹介入会：現会員様または過去に会員だった方からご紹介いただいた方※会員様または旧会員様のお名前を確認させていただきます。</option>
+                                <option value="いずれも当てはまらない">いずれも当てはまらない</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="card-pickup-date" class="form-label">会員証お渡しご希望日<span class="required-mark">*</span></label>
+                            <div class="p-4 bg-gray-50 rounded-lg border text-center">
+                                <p class="text-sm mb-3">会員証の受け取り方法が記載されております。ご来館前にご確認ください。</p>
+                                <a href="https://docs.google.com/presentation/d/10sK9lDw0qygX8VoVPoGbSyfzKdtd65I7/edit?slide=id.p1#slide=id.p1" target="_blank" class="block bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors shadow-sm">施設 初回ご利用案内</a>
+                            </div>
+                            <input type="date" id="card-pickup-date" name="pickup_date" class="form-input mt-4" required>
+                        </div>
+                        <div class="p-4 border rounded-lg">
+                             <p class="text-sm mb-2">当日、防犯のため写真撮影を行います。<br>また、入会アンケートへのご回答もお願いいたします。</p>
+                             <label class="flex items-center"><input type="checkbox" name="read_confirmation" value="確認しました" class="mr-2" required>確認しました<span class="required-mark">*</span></label>
+                        </div>
+                         <div>
+                            <label for="card-remarks" class="form-label">ご不明点等</label>
+                            <textarea id="card-remarks" name="remarks" rows="3" class="form-input" placeholder="ご不明点等ございましたら、ご記入ください。"></textarea>
+                        </div>
+                         <div class="text-center mt-8 flex justify-center gap-4">
+                           <button type="button" class="back-to-menu bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-lg hover:bg-gray-300 transition-colors">戻る</button>
+                           <button type="submit" class="bg-brand-teal text-white font-bold py-3 px-8 rounded-lg hover:bg-brand-teal-dark transition-colors">送信</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- 送信結果メッセージ -->
+    <div id="response-message" class="hidden fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-lg text-base transition-transform duration-500 transform translate-x-full"></div>
+
+    <!-- Floating Back to Menu Button -->
+    <button id="fab-back-to-menu" title="メニューに戻る" class="back-to-menu hidden fixed bottom-6 right-6 bg-brand-teal text-white w-14 h-14 md:w-16 md:h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ease-in-out transform hover:scale-110 group z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 md:h-8 md:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="absolute right-full mr-4 px-3 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            メニューに戻る
+        </span>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menu = document.getElementById('form-menu');
+            const formsContainer = document.getElementById('forms-container');
+            const pageTop = document.getElementById('page-top');
+            const formSections = formsContainer.querySelectorAll('.form-section');
+            const backButtons = document.querySelectorAll('.back-to-menu');
+            const responseMessage = document.getElementById('response-message');
+            const fabBackToMenu = document.getElementById('fab-back-to-menu');
+
+            // フォームを表示する関数
+            function showForm(formId) {
+                pageTop.style.display = 'none';
+                fabBackToMenu.classList.remove('hidden');
+                formSections.forEach(form => form.classList.remove('active'));
+                const targetForm = document.getElementById(formId);
+                if (targetForm) {
+                    targetForm.classList.add('active');
+                    window.scrollTo(0, 0); 
+                }
+            }
+            
+            // メニューに戻る関数
+            function backToMenu() {
+                formSections.forEach(form => form.classList.remove('active'));
+                pageTop.style.display = 'block';
+                fabBackToMenu.classList.add('hidden');
+                window.scrollTo(0, 0);
+            }
+
+            menu.addEventListener('click', function(e) {
+                const button = e.target.closest('button');
+                if (button && button.dataset.form) {
+                    showForm(button.dataset.form);
+                }
+            });
+
+            backButtons.forEach(btn => {
+                btn.addEventListener('click', backToMenu);
+            });
+            
+            function showResponseMessage(message, isSuccess) {
+                 responseMessage.textContent = message;
+                 responseMessage.classList.remove('hidden', 'translate-x-full', 'bg-brand-teal', 'bg-red-500');
+                 responseMessage.classList.add(isSuccess ? 'bg-brand-teal' : 'bg-red-500');
+                 setTimeout(() => responseMessage.classList.remove('translate-x-full'), 10);
+                 setTimeout(() => {
+                     responseMessage.classList.add('translate-x-full');
+                     setTimeout(() => responseMessage.classList.add('hidden'), 500);
+                 }, 5000);
+            }
+
+            // 住所検索機能
+            const searchAddressBtn = document.getElementById('search-address-btn');
+            if (searchAddressBtn) {
+                searchAddressBtn.addEventListener('click', function() {
+                    const zipcode = document.getElementById('trial-zipcode').value;
+                    if (!zipcode || !/^\d{7}$/.test(zipcode)) {
+                        showResponseMessage('7桁の郵便番号をハイフンなしで入力してください。', false);
+                        return;
+                    }
+
+                    fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zipcode}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 200 && data.results) {
+                                const result = data.results[0];
+                                const address1 = document.getElementById('trial-address1');
+                                const address2 = document.getElementById('trial-address2');
+                                
+                                address1.value = result.address1 + result.address2 + result.address3;
+                                address2.focus();
+                            } else {
+                                showResponseMessage('住所が見つかりませんでした。', false);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('住所検索エラー:', error);
+                            showResponseMessage('住所の検索中にエラーが発生しました。', false);
+                        });
+                });
+            }
+
+            // 年齢自動計算機能
+            const birthdateInput = document.getElementById('trial-birthdate');
+            if (birthdateInput) {
+                const ageInput = document.getElementById('trial-age');
+                birthdateInput.addEventListener('change', function() {
+                    if (!this.value) {
+                        ageInput.value = '';
+                        return;
+                    }
+                    const birthDate = new Date(this.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - birthDate.getFullYear();
+                    const m = today.getMonth() - birthDate.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+                    ageInput.value = age >= 0 ? age : '';
+                });
+            }
+
+            // 忘れ物フォームの連絡方法によるフィールド表示切り替え
+            const lostForm = document.getElementById('form-lost');
+            if(lostForm) {
+                const contactMethods = lostForm.querySelectorAll('input[name="contactMethod"]');
+                const phoneField = document.getElementById('lost-phone-field');
+                const emailField = document.getElementById('lost-email-field');
+                const visitField = document.getElementById('lost-visit-field');
+                const phoneInput = document.getElementById('lost-phone');
+                const emailInput = document.getElementById('lost-email');
+                const visitInput = document.getElementById('lost-visit-date');
+                
+                const toggleContactFields = (selectedValue) => {
+                    const isPhone = selectedValue === 'phone';
+                    const isEmail = selectedValue === 'email';
+                    const isVisit = selectedValue === 'visit';
+
+                    phoneField.classList.toggle('hidden', !isPhone);
+                    phoneInput.disabled = !isPhone;
+                    phoneInput.required = isPhone;
+
+                    emailField.classList.toggle('hidden', !isEmail);
+                    emailInput.disabled = !isEmail;
+                    emailInput.required = isEmail;
+
+                    visitField.classList.toggle('hidden', !isVisit);
+                    visitInput.disabled = !isVisit;
+                    visitInput.required = false; // visit is optional
+                };
+                
+                // Initialize to a clean state
+                toggleContactFields(null);
+
+                contactMethods.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        toggleContactFields(this.value);
+                    });
+                });
+            }
+
+            // 全てのフォームの送信処理
+            formsContainer.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const form = e.target;
+                
+                // ホットヨガ体験フォームの場合、住所を結合する
+                if (form.parentElement.id === 'form-trial') {
+                    const address1 = form.querySelector('#trial-address1').value;
+                    const address2 = form.querySelector('#trial-address2').value;
+                    // 修正: 'address' から '住所' に変更
+                    const combinedAddressInput = form.querySelector('input[name="住所"]');
+                    if(combinedAddressInput) {
+                        combinedAddressInput.value = address1 + address2;
+                    }
+                }
+
+                const submitButton = form.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.textContent;
+                
+                submitButton.disabled = true;
+                submitButton.textContent = '送信中...';
+
+                // ★ ここに、ひばりが丘店で新しくデプロイしたウェブアプリのURLを設定してください ★
+                const webAppUrl = 'https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nKZyZU2MyBWdE0lnoBA8LCwcAVvHZ/exec';
+
+                fetch(webAppUrl, {
+                    method: 'POST',
+                    body: new FormData(form),
+                })
+                .then(response => response.text()) // サーバーからの応答をまずテキストとして受け取る
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text); // テキストをJSONとして解析
+                        if (data.result === 'success') {
+                            form.reset();
+                            if (form.parentElement.id === 'form-lost') {
+                                // フォームリセット後にフィールドを再度非表示/無効化
+                                const lostForm = document.getElementById('form-lost');
+                                const activeContactMethod = lostForm.querySelector('input[name="contactMethod"]:checked');
+                                if (activeContactMethod) {
+                                    activeContactMethod.checked = false;
+                                }
+                                document.getElementById('lost-phone-field').classList.add('hidden');
+                                document.getElementById('lost-email-field').classList.add('hidden');
+                                document.getElementById('lost-visit-field').classList.add('hidden');
+                            }
+                            showResponseMessage('送信が完了しました。', true);
+                            backToMenu();
+                        } else {
+                            throw new Error(data.message || 'スクリプトでエラーが発生しました。');
+                        }
+                    } catch (e) {
+                        // JSONの解析に失敗した場合（Googleのエラーページなどが返された場合）
+                        console.error("サーバーからの応答が不正です:", text);
+                        throw new Error('サーバーから予期しない応答がありました。');
+                    }
+                })
+                .catch(error => {
+                    console.error('送信エラー:', error);
+                    showResponseMessage(`送信に失敗しました: ${error.message}`, false);
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
