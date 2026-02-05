@@ -115,12 +115,19 @@
         <div id="page-top" class="card max-w-2xl mx-auto">
             <div class="p-8 sm:p-12 text-center">
                 <header>
-                    <img src="yoga.jpg" alt="JOYFIT YOGA フレスポひばりが丘 ロゴ" class="mx-auto mb-6 h-20 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/200x80/ffffff/008374?text=YOGA+Hibari';">
                     <h1 class="text-3xl font-bold brand-teal">各種申請専用ページ</h1>
                     <p class="mt-2 text-gray-600">JOYFIT YOGA フレスポひばりが丘</p>
+
+                    <!-- ▼ 追加: 目立つレッスンプログラムリンク ▼ -->
+                    <div class="mt-8 mb-4">
+                        <!-- 修正: 緑色に変更、絵文字削除、文言統一 -->
+                        <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="inline-block w-full sm:w-auto bg-brand-teal text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                            今月のレッスンプログラムはこちら
+                        </a>
+                    </div>
                 </header>
 
-                <nav id="form-menu" class="mt-12 flex flex-col gap-8">
+                <nav id="form-menu" class="mt-10 flex flex-col gap-8">
                     <!-- 未入会者様向けメニュー -->
                     <div>
                         <h3 class="text-lg font-bold brand-teal mb-4 pb-2 border-b-2 border-teal-200 text-center">初めてご利用の方</h3>
@@ -188,9 +195,12 @@
                         <div>
                             <label class="form-label">体験希望日<span class="required-mark">*</span></label>
                             <div class="p-4 bg-gray-50 rounded-lg border text-sm space-y-3">
-                                <p class="text-center">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
-                                <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block text-center bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors shadow-sm">最新のレッスンプログラムはこちら</a>
-                                <div class="text-xs">
+                                <p class="text-center mb-2">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
+                                <!-- ▼ 修正: 緑色に変更、絵文字削除、文言統一 ▼ -->
+                                <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                    今月のレッスンプログラムはこちら
+                                </a>
+                                <div class="text-xs mt-3">
                                     <p class="font-bold text-center">【★の数で強度が異なります】</p>
                                     <p class="text-center">★：初心者向け／★★：中級者向け／★★★：上級者向け</p>
                                     <p class="text-center">溶岩浴：インストラクター不在の溶岩スタジオ内で、ゆっくりとお休みいただくお時間です。</p>
@@ -297,7 +307,7 @@
                 </div>
             </section>
 
-            <!-- ▼ 更新: レッスン予約キャンセル申請（複数選択対応） ▼ -->
+            <!-- ▼ 更新: レッスン予約キャンセル申請（複数選択対応・電話不可案内） ▼ -->
             <section id="form-cancel" class="form-section card">
                 <div class="p-8 sm:p-12">
                     <header class="text-center mb-8">
@@ -305,7 +315,12 @@
                     </header>
                     <div class="text-gray-700 text-sm space-y-4">
                         <p>メールアドレスを入力し「予約を確認」ボタンを押すと、現在の予約状況が表示されます。<br>キャンセルしたい予約にチェックを入れてください（複数選択可）。</p>
-                        <p class="info-box">※過去に申請された「体験」「ピラティス」「休会中レッスン」の予約が対象です。<br>※すでにキャンセル済みのものは選択できません。</p>
+                        <!-- ▼ 修正: 電話対応不可の案内を目立つように表示 ▼ -->
+                        <div class="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 font-bold">
+                            <p class="mb-1">※当店舗は電話対応を行っておりません。</p>
+                            <p>キャンセル等のご連絡は、必ず本フォームより申請をお願いいたします。</p>
+                        </div>
+                        <p class="text-xs text-gray-500">※過去に申請された「体験」「ピラティス」「休会中レッスン」の予約が対象です。<br>※すでにキャンセル済みのものは選択できません。</p>
                     </div>
                     <div class="mt-8 space-y-6">
                         <!-- 検索用フォームエリア -->
@@ -367,7 +382,10 @@
                               <p>※緑色「ピラティスリフォーマーグループレッスン」枠は<strong class="font-semibold">前月15日（営業時間内）まで</strong>にお済ませください。<br>例：8月中の緑色枠予約希望の場合、7月15日（火）22:00までにご予約。</p>
                          </div>
                          <div class="p-4 bg-gray-50 rounded-lg border text-center">
-                            <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors shadow-sm">最新のレッスンプログラムはこちら</a>
+                            <!-- ▼ 修正: 緑色に変更、絵文字削除、文言統一 ▼ -->
+                            <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                今月のレッスンプログラムはこちら
+                            </a>
                          </div>
                          <p class="info-box">【料金(税込)】<br>30分間：3,300円／60分間：6,600円<br><span class="text-xs">※翌月の月会費と合算請求させていただきます。※当日はチケットの発券は不要です。</span></p>
                     </div>
@@ -481,8 +499,11 @@
                         <div>
                             <label for="hiatus-datetime" class="form-label">希望日時<span class="required-mark">*</span></label>
                             <div class="p-4 bg-gray-50 rounded-lg border">
-                                <p class="text-sm text-center mb-3">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
-                                <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block text-center bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors shadow-sm">最新のレッスンプログラムはこちら</a>
+                                <p class="text-sm text-center mb-2">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
+                                <!-- ▼ 修正: 緑色に変更、絵文字削除、文言統一 ▼ -->
+                                <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
+                                    今月のレッスンプログラムはこちら
+                                </a>
                             </div>
                             <!-- 修正: プレースホルダーを「〇月〇日 10:00〜」形式に変更 -->
                             <input type="text" id="hiatus-datetime" name="lesson_datetime" class="form-input mt-4" placeholder="例: 〇月〇日 10:00〜" required>
@@ -660,6 +681,12 @@
             // ★ ここに、ひばりが丘店で新しくデプロイしたウェブアプリのURLを設定してください ★
             const webAppUrl = 'https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nKZyZU2MyBWdE0lnoBA8LCwcAVvHZ/exec';
 
+            // URLパラメータによる初期表示制御
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialForm = urlParams.get('form');
+            if (initialForm === 'cancel') {
+                showForm('form-cancel');
+            }
 
             // フォームを表示する関数
             function showForm(formId) {
