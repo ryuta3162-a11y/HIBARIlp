@@ -897,13 +897,13 @@
                     listArea.innerHTML = '<p class="text-center text-gray-500 py-4">該当する予約は見つかりませんでした。</p>';
                 } else {
                     reservations.forEach((res, index) => {
-                        // キャンセル済みかどうかの判定（文字列の部分一致など柔軟に対応）
-                        // ※GAS側から 'status' フィールドが返ってくる前提
-                        const isCancelled = res.status && res.status.indexOf('キャンセル') !== -1;
+                        // キャンセル済みかどうかの判定
+                        // String()で文字列化してから判定することで安全性を向上
+                        const isCancelled = res.status && String(res.status).indexOf('キャンセル') !== -1;
                         
                         const item = document.createElement('div');
-                        // styleを selection-list-item に変更し、キャンセル済みの場合は disabled クラスを追加
-                        item.className = `selection-list-item ${isCancelled ? 'disabled opacity-50 bg-gray-100' : ''}`;
+                        // 背景色などのスタイル切り替え（bg-whiteを明示的に追加）
+                        item.className = `selection-list-item ${isCancelled ? 'disabled opacity-50 bg-gray-100' : 'bg-white'}`;
                         
                         // 表示用日付フォーマット
                         let dateDisplay = res.datetime;
@@ -911,12 +911,15 @@
                              dateDisplay = new Date(dateDisplay).toLocaleString();
                         }
 
+                        // テキストスタイルの定義（有効な予約には no-underline を明示して線を消す）
+                        const textStyle = isCancelled ? 'text-gray-500 line-through' : 'text-gray-800 no-underline';
+
                         // キャンセル済みの場合はチェックボックスを無効化 (disabled)
                         const content = `
                             <label class="flex items-start w-full ${isCancelled ? 'cursor-not-allowed' : 'cursor-pointer'}">
                                 <input type="checkbox" name="selected_reservation_index" value="${index}" ${isCancelled ? 'disabled' : ''}>
                                 <div class="flex-1">
-                                    <p class="font-bold ${isCancelled ? 'text-gray-500 line-through' : 'text-gray-800'}">
+                                    <p class="font-bold ${textStyle}">
                                         【${res.type}】 ${dateDisplay}
                                     </p>
                                     <p class="text-xs text-gray-500">名前: ${res.name}</p>
