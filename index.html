@@ -90,7 +90,7 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .selection-list-item:hover {
+        .selection-list-item:hover:not(.disabled) {
             background-color: #f9fafb;
         }
         /* inputのスタイル調整 */
@@ -101,10 +101,12 @@
             width: 1.2rem;
             height: 1.2rem;
         }
+        /* グレーアウト（無効化）のスタイル */
         .selection-list-item.disabled {
             background-color: #f3f4f6;
             opacity: 0.6;
             cursor: not-allowed;
+            border-color: #d1d5db;
         }
     </style>
 </head>
@@ -118,9 +120,8 @@
                     <h1 class="text-3xl font-bold brand-teal">各種申請専用ページ</h1>
                     <p class="mt-2 text-gray-600">JOYFIT YOGA フレスポひばりが丘</p>
 
-                    <!-- ▼ 追加: 目立つレッスンプログラムリンク ▼ -->
+                    <!-- レッスンプログラムリンク -->
                     <div class="mt-8 mb-4">
-                        <!-- 修正: 緑色に変更、絵文字削除、文言統一 -->
                         <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="inline-block w-full sm:w-auto bg-brand-teal text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                             今月のレッスンプログラムはこちら
                         </a>
@@ -154,7 +155,6 @@
                             <button data-form="form-hiatus" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ 休会中1回受講予約</button>
                             <button data-form="form-lost" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ 忘れ物お問い合わせ</button>
                             <button data-form="form-este" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ セルフエステ利用申請</button>
-                            <!-- 会員証発行ボタンを削除 -->
                         </div>
                     </div>
                 </nav>
@@ -196,7 +196,6 @@
                             <label class="form-label">体験希望日<span class="required-mark">*</span></label>
                             <div class="p-4 bg-gray-50 rounded-lg border text-sm space-y-3">
                                 <p class="text-center mb-2">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
-                                <!-- ▼ 修正: 緑色に変更、絵文字削除、文言統一 ▼ -->
                                 <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                                     今月のレッスンプログラムはこちら
                                 </a>
@@ -307,7 +306,7 @@
                 </div>
             </section>
 
-            <!-- ▼ 更新: レッスン予約キャンセル申請（複数選択対応・電話不可案内） ▼ -->
+            <!-- ▼ 更新: レッスン予約キャンセル申請（整合性保持・グレーアウト実装） ▼ -->
             <section id="form-cancel" class="form-section card">
                 <div class="p-8 sm:p-12">
                     <header class="text-center mb-8">
@@ -315,7 +314,7 @@
                     </header>
                     <div class="text-gray-700 text-sm space-y-4">
                         <p>メールアドレスを入力し「予約を確認」ボタンを押すと、現在の予約状況が表示されます。<br>キャンセルしたい予約にチェックを入れてください（複数選択可）。</p>
-                        <!-- ▼ 修正: 電話対応不可の案内を目立つように表示 ▼ -->
+                        <!-- 電話対応不可の案内 -->
                         <div class="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 font-bold">
                             <p class="mb-1">※当店舗は電話対応を行っておりません。</p>
                             <p>キャンセル等のご連絡は、必ず本フォームより申請をお願いいたします。</p>
@@ -382,7 +381,6 @@
                               <p>※緑色「ピラティスリフォーマーグループレッスン」枠は<strong class="font-semibold">前月15日（営業時間内）まで</strong>にお済ませください。<br>例：8月中の緑色枠予約希望の場合、7月15日（火）22:00までにご予約。</p>
                          </div>
                          <div class="p-4 bg-gray-50 rounded-lg border text-center">
-                            <!-- ▼ 修正: 緑色に変更、絵文字削除、文言統一 ▼ -->
                             <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                                 今月のレッスンプログラムはこちら
                             </a>
@@ -436,7 +434,6 @@
                         <div class="space-y-4 pt-4 border-t">
                              <div>
                                 <label for="pilates-date-1" class="form-label">第1希望日時<span class="required-mark">*</span></label>
-                                <!-- 修正: プレースホルダーを「〇月〇日 10:00〜」形式に変更 -->
                                 <input type="text" id="pilates-date-1" name="preferred_date_1" class="form-input" placeholder="例: 〇月〇日 10:00〜" required>
                              </div>
                              <div>
@@ -500,12 +497,10 @@
                             <label for="hiatus-datetime" class="form-label">希望日時<span class="required-mark">*</span></label>
                             <div class="p-4 bg-gray-50 rounded-lg border">
                                 <p class="text-sm text-center mb-2">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
-                                <!-- ▼ 修正: 緑色に変更、絵文字削除、文言統一 ▼ -->
                                 <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
                                     今月のレッスンプログラムはこちら
                                 </a>
                             </div>
-                            <!-- 修正: プレースホルダーを「〇月〇日 10:00〜」形式に変更 -->
                             <input type="text" id="hiatus-datetime" name="lesson_datetime" class="form-input mt-4" placeholder="例: 〇月〇日 10:00〜" required>
                             <p class="text-xs text-gray-500 mt-2">※日付と開始時間を入力してください。<br>※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。</p>
                         </div>
@@ -651,12 +646,11 @@
                 </div>
             </section>
 
-            <!-- 会員証発行セクションのフォーム本体を削除 -->
         </div>
     </div>
     
     <!-- 送信結果メッセージ -->
-    <div id="response-message" class="hidden fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-lg text-base transition-transform duration-500 transform translate-x-full"></div>
+    <div id="response-message" class="hidden fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-lg text-base transition-transform duration-500 transform translate-x-full z-50"></div>
 
     <!-- Floating Back to Menu Button -->
     <button id="fab-back-to-menu" title="メニューに戻る" class="back-to-menu hidden fixed bottom-6 right-6 bg-brand-teal text-white w-14 h-14 md:w-16 md:h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ease-in-out transform hover:scale-110 group z-50">
@@ -678,7 +672,7 @@
             const responseMessage = document.getElementById('response-message');
             const fabBackToMenu = document.getElementById('fab-back-to-menu');
             
-            // ★ ここに、ひばりが丘店で新しくデプロイしたウェブアプリのURLを設定してください ★
+            // ★ GASウェブアプリのURL（ひばりが丘店用） ★
             const webAppUrl = 'https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nKZyZU2MyBWdE0lnoBA8LCwcAVvHZ/exec';
 
             // URLパラメータによる初期表示制御
@@ -903,10 +897,13 @@
                     listArea.innerHTML = '<p class="text-center text-gray-500 py-4">該当する予約は見つかりませんでした。</p>';
                 } else {
                     reservations.forEach((res, index) => {
-                        const isCancelled = res.status && res.status.includes('キャンセル');
+                        // キャンセル済みかどうかの判定（文字列の部分一致など柔軟に対応）
+                        // ※GAS側から 'status' フィールドが返ってくる前提
+                        const isCancelled = res.status && res.status.indexOf('キャンセル') !== -1;
+                        
                         const item = document.createElement('div');
-                        // styleを selection-list-item に変更
-                        item.className = `selection-list-item ${isCancelled ? 'disabled' : ''}`;
+                        // styleを selection-list-item に変更し、キャンセル済みの場合は disabled クラスを追加
+                        item.className = `selection-list-item ${isCancelled ? 'disabled opacity-50 bg-gray-100' : ''}`;
                         
                         // 表示用日付フォーマット
                         let dateDisplay = res.datetime;
@@ -914,9 +911,9 @@
                              dateDisplay = new Date(dateDisplay).toLocaleString();
                         }
 
+                        // キャンセル済みの場合はチェックボックスを無効化 (disabled)
                         const content = `
-                            <label class="flex items-start w-full cursor-pointer">
-                                <!-- checkboxに変更 -->
+                            <label class="flex items-start w-full ${isCancelled ? 'cursor-not-allowed' : 'cursor-pointer'}">
                                 <input type="checkbox" name="selected_reservation_index" value="${index}" ${isCancelled ? 'disabled' : ''}>
                                 <div class="flex-1">
                                     <p class="font-bold ${isCancelled ? 'text-gray-500 line-through' : 'text-gray-800'}">
@@ -930,10 +927,13 @@
                         item.innerHTML = content;
                         
                         // チェックボックス変更時のイベント (1つでも選択されていればボタン有効化)
-                        item.querySelector('input').addEventListener('change', function() {
-                            const anyChecked = listArea.querySelectorAll('input[type="checkbox"]:checked').length > 0;
-                            submitBtn.disabled = !anyChecked;
-                        });
+                        // キャンセル済みの項目は disabled なので change イベントは発火しない = 安全
+                        if (!isCancelled) {
+                            item.querySelector('input').addEventListener('change', function() {
+                                const anyChecked = listArea.querySelectorAll('input[type="checkbox"]:checked').length > 0;
+                                submitBtn.disabled = !anyChecked;
+                            });
+                        }
                         
                         listArea.appendChild(item);
                     });
@@ -972,13 +972,16 @@
                     
                     checkedBoxes.forEach(box => {
                         const index = parseInt(box.value);
+                        // インデックスを使って元の配列から「データそのもの」を取得して送信する
+                        // これにより、GAS側でインデックスがずれていてもデータ照合が可能になる
                         if (currentReservations[index]) {
                             selectedReservations.push(currentReservations[index]);
                         }
                     });
                     
                     // JSON文字列としてセット
-                    formData.append('cancel_reservations_json', JSON.stringify(selectedReservations));
+                    // 修正: appendではなくsetを使用して、空の隠しフィールドを上書きする
+                    formData.set('cancel_reservations_json', JSON.stringify(selectedReservations));
                 }
 
                 const submitButton = form.querySelector('button[type="submit"]');
@@ -987,48 +990,51 @@
                 submitButton.disabled = true;
                 submitButton.textContent = '送信中...';
 
-                // ★ ここに、ひばりが丘店で新しくデプロイしたウェブアプリのURLを設定してください ★
-                const webAppUrl = 'https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nKZyZU2MyBWdE0lnoBA8LCwcAVvHZ/exec';
-
                 fetch(webAppUrl, {
                     method: 'POST',
                     body: formData,
                 })
                 .then(response => response.text()) // サーバーからの応答をまずテキストとして受け取る
                 .then(text => {
+                    // 修正: エラーハンドリングのロジックを改善
+                    let data;
                     try {
-                        const data = JSON.parse(text); // テキストをJSONとして解析
-                        if (data.result === 'success') {
-                            form.reset();
-                            
-                            // キャンセルフォームのリセット処理追加
-                            if (form.id === 'cancel-submit-form') {
-                                document.getElementById('reservation-result-area').classList.add('hidden');
-                                document.getElementById('pre-search-actions').classList.remove('hidden');
-                                document.getElementById('search-email').value = '';
-                                currentReservations = []; // データをクリア
-                            }
-
-                            if (form.parentElement.id === 'form-lost') {
-                                // フォームリセット後にフィールドを再度非表示/無効化
-                                const lostForm = document.getElementById('form-lost');
-                                const activeContactMethod = lostForm.querySelector('input[name="contactMethod"]:checked');
-                                if (activeContactMethod) {
-                                    activeContactMethod.checked = false;
-                                }
-                                document.getElementById('lost-phone-field').classList.add('hidden');
-                                document.getElementById('lost-email-field').classList.add('hidden');
-                                document.getElementById('lost-visit-field').classList.add('hidden');
-                            }
-                            showResponseMessage('送信が完了しました。', true);
-                            backToMenu();
-                        } else {
-                            throw new Error(data.message || 'スクリプトでエラーが発生しました。');
-                        }
+                        data = JSON.parse(text); // テキストをJSONとして解析
                     } catch (e) {
-                        // JSONの解析に失敗した場合（Googleのエラーページなどが返された場合）
-                        console.error("サーバーからの応答が不正です:", text);
+                        // JSON解析エラーの場合
+                        console.error("サーバーからの応答が不正です(JSON parse error):", text);
                         throw new Error('サーバーから予期しない応答がありました。');
+                    }
+
+                    // JSON解析成功後のロジック
+                    if (data.result === 'success') {
+                        form.reset();
+                        
+                        // キャンセルフォームのリセット処理追加
+                        if (form.id === 'cancel-submit-form') {
+                            document.getElementById('reservation-result-area').classList.add('hidden');
+                            document.getElementById('pre-search-actions').classList.remove('hidden');
+                            document.getElementById('search-email').value = '';
+                            currentReservations = []; // データをクリア
+                        }
+
+                        if (form.parentElement.id === 'form-lost') {
+                            // フォームリセット後にフィールドを再度非表示/無効化
+                            const lostForm = document.getElementById('form-lost');
+                            const activeContactMethod = lostForm.querySelector('input[name="contactMethod"]:checked');
+                            if (activeContactMethod) {
+                                activeContactMethod.checked = false;
+                            }
+                            document.getElementById('lost-phone-field').classList.add('hidden');
+                            document.getElementById('lost-email-field').classList.add('hidden');
+                            document.getElementById('lost-visit-field').classList.add('hidden');
+                        }
+                        showResponseMessage('送信が完了しました。', true);
+                        backToMenu();
+                    } else {
+                        // サーバーがエラー（success以外）を返した場合
+                        // catchブロックではなくここでエラーを投げて、下の.catchで処理させる
+                        throw new Error(data.message || 'スクリプトでエラーが発生しました。');
                     }
                 })
                 .catch(error => {
