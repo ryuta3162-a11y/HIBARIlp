@@ -29,10 +29,16 @@ https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nK
 | `cancel_request` | キャンセル申請 |
 | `membership_card` | 会員証発行（※別フォーム用。index.html には未実装） |
 
+## 取り消し線が下の行に伝染する問題
+
+キャンセル行の直下に新しい予約が `appendRow` で追加されると、Google スプレッドシートの仕様で**直上の行の書式（取り消し線）が引き継がれる**ことがあります。
+
+`Code.gs` では新規行追記後に `resetRowFormatting` で書式をリセットするよう対応済みです。  
+既に誤って取り消し線が入っている行（例：星雅美さん 6/15 の予約）は、スプレッドシート上で手動解除が必要です。
+
 ## 注意（index.html との差分）
 
-キャンセルフォームは `cancel_reservations_json`（複数予約の JSON）を送信しますが、  
-現在の `processCancellation` は `targetSheet` / `targetRow` の単一指定を想定しています。  
-複数選択キャンセルで元シートのグレーアウトまで行う場合は、GAS 側の `processCancellation` を JSON 対応に更新する必要があります。
+キャンセルフォームは `cancel_reservations_json`（複数予約の JSON）を送信します。  
+`processCancellation` は JSON 対応済みです（`markRowAsCancelled` で該当行のみグレーアウト）。
 
 自動返信メールの「ピラティス」表記を LP と揃える場合は、`sendConfirmationEmailToCustomer` 内の件名・本文を編集してください（スプレッドシートのシート名は変更不要）。

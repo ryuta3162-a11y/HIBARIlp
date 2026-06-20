@@ -121,11 +121,16 @@ function doPost(e) {
     if (newRow[0] === '') newRow[0] = now;
 
     sheet.appendRow(newRow);
+    const appendedRow = sheet.getLastRow();
+    // 直上の行がキャンセル済み（取り消し線あり）だと、新規行に書式が引き継がれるためリセット
+    resetRowFormatting(sheet, appendedRow);
 
     // ★ここでデザイン整形と管理列（台帳記入）の追加を実行★
     // (StyleManager.gsにある関数を呼び出す)
     if (typeof applySheetStyle === 'function') {
       applySheetStyle(sheet);
+      // スタイル適用後も、今回追記した行だけ通常表示に戻す
+      resetRowFormatting(sheet, appendedRow);
     }
 
     // メール送信処理
@@ -256,48 +261,78 @@ function searchReservations(spreadsheet, targetEmail) {
 }
 
 /**
- * キャンセル処理：元のデータの備考欄に追記する
+ * 新規追記行の書式を通常表示に戻す
+ * （キャンセル行の直下に appendRow すると取り消し線が引き継がれる問題への対策）
+ */
+function resetRowFormatting(sheet, row) {
+  const lastCol = sheet.getLastColumn();
+  if (lastCol < 1 || row < 2) return;
+
+  const rowRange = sheet.getRange(row, 1, 1, lastCol);
+  rowRange.setBackground('#ffffff');
+  rowRange.setFontColor('#000000');
+  rowRange.setFontLine('none');
+}
+
+/**
+ * キャンセル処理：元のデータの備考欄に追記し、該当行のみグレーアウトする
  */
 function processCancellation(spreadsheet, params) {
+  // LPからの複数選択キャンセル（cancel_reservations_json）
+  if (params.cancel_reservations_json) {
+    try {
+      const reservations = JSON.parse(params.cancel_reservations_json);
+      reservations.forEach(function(res) {
+        if (res.sheet && res.row) {
+          markRowAsCancelled(spreadsheet, res.sheet, parseInt(res.row, 10));
+        }
+      });
+    } catch (e) {
+      console.error('cancel_reservations_json の解析に失敗:', e.toString());
+    }
+    return;
+  }
+
+  // 旧形式（単一指定）
   const targetSheetName = params.targetSheet;
   const targetRow = parseInt(params.targetRow, 10);
-  
+  if (targetSheetName && targetRow) {
+    markRowAsCancelled(spreadsheet, targetSheetName, targetRow);
+  }
+}
+
+/**
+ * 指定行のみキャンセル済み表示にする（他の行には影響しない）
+ */
+function markRowAsCancelled(spreadsheet, targetSheetName, targetRow) {
   if (!targetSheetName || !targetRow) return;
-  
+
   const sheet = spreadsheet.getSheetByName(targetSheetName);
   if (!sheet) return;
 
-  // 備考欄のカラムを探す
   const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   let remarksIdx = -1;
-  // 既存の備考欄を探す、なければ最終列に追加する想定
-  for(let i=0; i<headers.length; i++) {
-     if(headers[i].includes('備考') || headers[i] === 'remarks') {
-       remarksIdx = i;
-       break;
-     }
+  for (let i = 0; i < headers.length; i++) {
+    if (headers[i].includes('備考') || headers[i] === 'remarks') {
+      remarksIdx = i;
+      break;
+    }
   }
-  
-  const cancelNote = `【キャンセル申請あり】申請日時: ${new Date().toLocaleString('ja-JP')}`;
+
+  const cancelNote = '【キャンセル申請あり】申請日時: ' + new Date().toLocaleString('ja-JP');
 
   if (remarksIdx !== -1) {
-    // 既存の備考欄に追記
     const cell = sheet.getRange(targetRow, remarksIdx + 1);
     const currentVal = cell.getValue();
     if (!currentVal.toString().includes('【キャンセル申請あり】')) {
-       cell.setValue(currentVal + '\n' + cancelNote);
+      cell.setValue(currentVal + '\n' + cancelNote);
     }
-  } else {
-    // 備考欄が見つからない場合、メモとして背景色を変える等の処理でも良いが
-    // ここでは簡易的に、その行の背景色をグレーにする
-    sheet.getRange(targetRow, 1, 1, sheet.getLastColumn()).setBackground('#d3d3d3');
   }
 
-  // ★追加: 行全体をグレーアウト＆取り消し線★
   const rowRange = sheet.getRange(targetRow, 1, 1, sheet.getLastColumn());
-  rowRange.setBackground('#d9d9d9');      // 背景をグレーに
-  rowRange.setFontColor('#808080');       // 文字色をグレーに
-  rowRange.setFontLine('line-through');   // 取り消し線を追加
+  rowRange.setBackground('#d9d9d9');
+  rowRange.setFontColor('#808080');
+  rowRange.setFontLine('line-through');
 }
 
 /**
