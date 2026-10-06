@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/hibarigaoka-studio", "destination": "/v2/index.html" },
+    { "source": "/hibarigaoka-studio/", "destination": "/v2/index.html" }
+  ]
+}
