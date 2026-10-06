@@ -107,7 +107,7 @@ function importLessonList(targetSpreadsheet) {
   const ss = targetSpreadsheet || SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById(SPREADSHEET_ID);
   let sheet = ss.getSheetByName(LESSON_SHEET_NAME);
   if (!sheet) sheet = ss.insertSheet(LESSON_SHEET_NAME);
-  sheet.clear();
+  sheet.getRange(1, 1, Math.max(sheet.getMaxRows(), 2), 10).clear();
 
   const headers = ['対象月', '曜日', '開始', '終了', '分数', 'レッスン名', '強度', '定員', '備考', '色'];
   const rows = LESSONS.map(function(l) {
@@ -125,19 +125,127 @@ function importLessonList(targetSpreadsheet) {
   const nameFonts = rows.map(function(r) { return [r[9] === 'yellow' ? '#000000' : '#ffffff']; });
   sheet.getRange(2, 6, rows.length, 1).setBackgrounds(nameBgs).setFontColors(nameFonts).setFontWeight('bold');
 
-  const noteCol = headers.length + 2;
-  sheet.getRange(1, noteCol, 1, 2).setValues([['項目', '内容']])
-    .setFontWeight('bold').setBackground('#008374').setFontColor('#ffffff');
-  sheet.getRange(2, noteCol, MONTH_NOTES.length, 2).setValues(MONTH_NOTES).setWrap(true);
-
   sheet.setFrozenRows(1);
   sheet.autoResizeColumns(1, headers.length);
   sheet.setColumnWidth(9, 360);
-  sheet.setColumnWidth(noteCol, 160);
-  sheet.setColumnWidth(noteCol + 1, 420);
   sheet.getRange(2, 9, rows.length, 1).setWrap(true);
 
+  ensureLessonSheetLayout_(sheet);
   refreshChangeTargetValidation_(ss);
+}
+
+/* ===============================================================
+ * レッスン一覧シート右側：予約不可日程（L〜Q列）と概要（S〜T列）
+ * =============================================================== */
+
+const BLOCKED_COL = 12; // L
+const BLOCKED_HEADERS = ['予約不可 日付', '曜日', '開始', '終了', '理由・表示文', 'LP掲載'];
+const BLOCKED_MAX_ROWS = 300;
+const NOTES_COL = 19; // S
+
+const BLOCKED_SEED = [
+  ['2026-10-05', '15:00', '16:00', ''],
+  ['2026-10-05', '16:30', '17:30', ''],
+  ['2026-10-05', '18:45', '19:45', ''],
+  ['2026-10-05', '20:15', '21:15', ''],
+  ['2026-10-06', '10:00', '11:00', ''],
+  ['2026-10-06', '11:30', '12:30', ''],
+  ['2026-10-07', '15:15', '16:15', ''],
+  ['2026-10-08', '11:15', '12:15', ''],
+  ['2026-10-09', '', '', '休館日'],
+  ['2026-10-10', '16:00', '17:00', ''],
+  ['2026-10-12', '', '', '祝日プログラムをご確認ください'],
+  ['2026-10-26', '12:30', '13:30', '']
+];
+
+function ensureLessonSheetLayout_(sheet) {
+  const current = sheet.getRange(1, BLOCKED_COL).getValue();
+  if (current === BLOCKED_HEADERS[0]) return;
+
+  let notes = MONTH_NOTES;
+  if (current === '項目') {
+    const lastRow = Math.max(sheet.getLastRow(), 2);
+    notes = sheet.getRange(2, BLOCKED_COL, lastRow - 1, 2).getValues()
+      .filter(function(r) { return r[0] !== '' || r[1] !== ''; });
+    sheet.getRange(1, BLOCKED_COL, lastRow, 2).clear();
+  }
+
+  sheet.getRange(1, NOTES_COL, 1, 2).setValues([['項目', '内容']])
+    .setFontWeight('bold').setBackground('#008374').setFontColor('#ffffff');
+  if (notes.length) {
+    sheet.getRange(2, NOTES_COL, notes.length, 2).setValues(notes).setWrap(true).setVerticalAlignment('top');
+  }
+  sheet.setColumnWidth(NOTES_COL, 160);
+  sheet.setColumnWidth(NOTES_COL + 1, 420);
+
+  const header = sheet.getRange(1, BLOCKED_COL, 1, BLOCKED_HEADERS.length);
+  header.setValues([BLOCKED_HEADERS]).setFontWeight('bold').setBackground('#C0392B').setFontColor('#ffffff');
+  sheet.getRange(1, BLOCKED_COL).setNote(
+    '体験・休会中のご予約を受け付けない日時を入力します。\n' +
+    '・開始/終了を空欄にすると、その日は終日予約不可\n' +
+    '・開始/終了を入れると、その時間帯に始まるレッスンが予約不可\n' +
+    '・LP掲載のチェックを外すと無効になります');
+
+  const dateRange = sheet.getRange(2, BLOCKED_COL, BLOCKED_MAX_ROWS, 1);
+  dateRange.setNumberFormat('yyyy/mm/dd')
+    .setDataValidation(SpreadsheetApp.newDataValidation().requireDate().setAllowInvalid(false).build());
+  sheet.getRange(2, BLOCKED_COL + 1).setFormula(
+    '=ARRAYFORMULA(IF(L2:L="","",MID("日月火水木金土",WEEKDAY(L2:L),1)))');
+  sheet.getRange(2, BLOCKED_COL + 2, BLOCKED_MAX_ROWS, 2).setNumberFormat('@');
+  sheet.getRange(2, BLOCKED_COL + 5, BLOCKED_MAX_ROWS, 1).insertCheckboxes();
+
+  const seedRows = BLOCKED_SEED.map(function(s) {
+    const p = s[0].split('-').map(Number);
+    return [new Date(p[0], p[1] - 1, p[2])];
+  });
+  sheet.getRange(2, BLOCKED_COL, BLOCKED_SEED.length, 1).setValues(seedRows);
+  sheet.getRange(2, BLOCKED_COL + 2, BLOCKED_SEED.length, 3)
+    .setValues(BLOCKED_SEED.map(function(s) { return [s[1], s[2], s[3]]; }));
+  sheet.getRange(2, BLOCKED_COL + 5, BLOCKED_SEED.length, 1)
+    .setValues(BLOCKED_SEED.map(function() { return [true]; }));
+
+  sheet.getRange(2, BLOCKED_COL, BLOCKED_MAX_ROWS, BLOCKED_HEADERS.length).setBackground('#FDF2F2');
+  sheet.setColumnWidth(BLOCKED_COL, 110);
+  sheet.setColumnWidth(BLOCKED_COL + 1, 50);
+  sheet.setColumnWidth(BLOCKED_COL + 2, 70);
+  sheet.setColumnWidth(BLOCKED_COL + 3, 70);
+  sheet.setColumnWidth(BLOCKED_COL + 4, 260);
+  sheet.setColumnWidth(BLOCKED_COL + 5, 70);
+}
+
+function readBlocked_(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2 || sheet.getRange(1, BLOCKED_COL).getValue() !== BLOCKED_HEADERS[0]) return [];
+  return sheet.getRange(2, BLOCKED_COL, lastRow - 1, BLOCKED_HEADERS.length).getValues()
+    .filter(function(r) { return r[0] instanceof Date && r[5] === true; })
+    .map(function(r) {
+      return {
+        date: Utilities.formatDate(r[0], 'Asia/Tokyo', 'yyyy-MM-dd'),
+        start: cellToTime_(r[2]),
+        end: cellToTime_(r[3]),
+        message: String(r[4] || '').trim()
+      };
+    });
+}
+
+function toMin_(t) {
+  if (!t) return null;
+  const p = String(t).split(':');
+  return Number(p[0]) * 60 + Number(p[1] || 0);
+}
+
+function isSlotBlocked_(ss, slot) {
+  const sheet = ss.getSheetByName(LESSON_SHEET_NAME);
+  if (!sheet) return false;
+  const date = slot.slice(0, 10);
+  const start = toMin_(slot.slice(11));
+  return readBlocked_(sheet).some(function(b) {
+    if (b.date !== date) return false;
+    if (!b.start) return true;
+    const s = toMin_(b.start);
+    const e = b.end ? toMin_(b.end) : 24 * 60;
+    return start >= s && start < e;
+  });
 }
 
 /* ===============================================================
@@ -151,6 +259,8 @@ const CHANGE_MAX_ROWS = 500;
 
 function setupChangeSheetIfMissing() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const lessonSheet = ss.getSheetByName(LESSON_SHEET_NAME);
+  if (lessonSheet && lessonSheet.getLastRow() >= 2) ensureLessonSheetLayout_(lessonSheet);
   if (!ss.getSheetByName(CHANGE_SHEET_NAME)) {
     setupChangeSheet_(ss, true);
   }
@@ -273,7 +383,8 @@ function readChanges_(sheet) {
 function readNotes_(sheet) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
-  return sheet.getRange(2, 12, lastRow - 1, 2).getValues()
+  if (sheet.getRange(1, NOTES_COL).getValue() !== '項目') return [];
+  return sheet.getRange(2, NOTES_COL, lastRow - 1, 2).getValues()
     .filter(function(r) { return r[0] && r[1]; })
     .map(function(r) { return { label: String(r[0]), value: String(r[1]) }; });
 }
@@ -350,11 +461,13 @@ function getLessonData() {
   const lessonSheet = ss.getSheetByName(LESSON_SHEET_NAME);
   const changeSheet = ss.getSheetByName(CHANGE_SHEET_NAME);
   const today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
+  if (lessonSheet) ensureLessonSheetLayout_(lessonSheet);
   return {
     result: 'success',
     today: today,
     lessons: lessonSheet ? readLessons_(lessonSheet) : [],
     notes: lessonSheet ? readNotes_(lessonSheet) : [],
+    blocked: lessonSheet ? readBlocked_(lessonSheet).filter(function(b) { return b.date >= today; }) : [],
     changes: changeSheet ? readChanges_(changeSheet).filter(function(c) { return c.date >= today; }) : [],
     bookings: countBookings_(ss, today)
   };

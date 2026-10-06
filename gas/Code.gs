@@ -136,6 +136,10 @@ function doPost(e) {
       lock = LockService.getScriptLock();
       lock.waitLock(20000);
       ensureHeader_(sheet, 'lesson_slot');
+      if (isSlotBlocked_(spreadsheet, params.lesson_slot)) {
+        lock.releaseLock();
+        throw new Error('選択された日時はご予約いただけません。別のレッスンをお選びください。');
+      }
       const full = isSlotFull_(spreadsheet, params.lesson_slot);
       if (full) {
         lock.releaseLock();

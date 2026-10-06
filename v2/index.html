@@ -108,6 +108,15 @@
             cursor: not-allowed;
             border-color: #d1d5db;
         }
+        #page-top { overflow: clip; }
+        .hero { background: linear-gradient(135deg, #008374 0%, #00a593 60%, #3cc4b0 100%); }
+        .no-scrollbar { scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .skeleton { background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+        @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+        .state-pill { display: inline-block; min-width: 4.5rem; text-align: center; font-size: 0.8rem; font-weight: 700; padding: 0.5rem 0.75rem; border-radius: 9999px; }
+        .lesson-tab.active { background: #008374; color: #fff; border-color: #008374; }
+        .lesson-tab.active .tab-sub { color: #fff !important; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -115,24 +124,34 @@
     <div class="min-h-screen container mx-auto p-4 sm:p-6 md:p-8">
         
         <div id="page-top" class="card max-w-2xl mx-auto">
-            <div class="p-8 sm:p-12 text-center">
-                <header>
-                    <h1 class="text-3xl font-bold brand-teal">レッスン予約</h1>
-                    <p class="mt-2 text-gray-600">JOYFIT YOGA フレスポひばりが丘</p>
-                </header>
+            <header class="hero text-white text-center px-6 pt-10 pb-8">
+                <p class="text-xs tracking-widest opacity-80">JOYFIT YOGA フレスポひばりが丘</p>
+                <h1 class="text-3xl font-bold mt-2">レッスン予約</h1>
+                <p class="text-sm mt-3 opacity-90">日付を選んで、ご希望のレッスンをタップしてください</p>
+            </header>
+            <div class="p-5 sm:p-8 text-center">
 
                 <!-- レッスン予約（スプレッドシート「レッスン一覧」「休講・変更」から取得） -->
-                <section id="lesson-schedule" class="mt-8 text-left">
-                    <p class="text-sm text-gray-600 text-center mb-4">日付を選んで、ご希望のレッスンをタップしてください。</p>
-                    <div id="lesson-changes" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
-                        <p class="font-bold text-red-700 mb-2">休講・変更のお知らせ</p>
+                <section id="lesson-schedule" class="text-left">
+                    <div id="lesson-changes" class="hidden mb-5 p-4 bg-red-50 border border-red-200 rounded-xl">
+                        <p class="font-bold text-red-700 text-sm mb-2">休講・変更のお知らせ</p>
                         <ul id="lesson-changes-list" class="text-sm text-red-700 space-y-1"></ul>
                     </div>
-                    <div id="lesson-day-tabs" class="flex gap-2 overflow-x-auto pb-2"></div>
-                    <div id="lesson-day-body" class="mt-4 space-y-2">
-                        <p id="lesson-loading" class="p-6 text-center text-gray-500">スケジュールを読み込んでいます...</p>
+                    <div class="date-bar sticky top-0 z-30 bg-white -mx-5 sm:-mx-8 px-5 sm:px-8 pt-2 pb-3 border-b">
+                        <p id="lesson-month-label" class="text-sm font-bold text-gray-700 mb-2"></p>
+                        <div id="lesson-day-tabs" class="no-scrollbar flex gap-2 overflow-x-auto"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-4">★初級／★★中級／★★★上級　溶岩浴：インストラクター不在の溶岩スタジオ内で、ゆっくりとお休みいただくお時間です。<br>※内容は変更になる場合がございます。</p>
+                    <p id="lesson-day-hours" class="text-xs text-gray-500 mt-3"></p>
+                    <div id="lesson-day-body" class="mt-3 space-y-3">
+                        <div class="skeleton h-20 rounded-xl"></div>
+                        <div class="skeleton h-20 rounded-xl"></div>
+                        <div class="skeleton h-20 rounded-xl"></div>
+                    </div>
+                    <div class="mt-6 p-4 bg-gray-50 rounded-xl text-xs text-gray-600 space-y-1">
+                        <p><span class="text-amber-500">★</span>初級　<span class="text-amber-500">★★</span>中級　<span class="text-amber-500">★★★</span>上級</p>
+                        <p>溶岩浴：インストラクター不在の溶岩スタジオ内で、ゆっくりとお休みいただくお時間です。</p>
+                        <p>※レッスン開始20分前〜5分前にご来館ください。内容は変更になる場合がございます。</p>
+                    </div>
                 </section>
 
                 <!-- レッスン選択後の予約区分選択 -->
@@ -741,6 +760,8 @@
                 });
                 items.sort((a, b) => timeKey(a.start) - timeKey(b.start));
 
+                const blocks = (data.blocked || []).filter(b => b.date === dateStr);
+                const dayBlock = blocks.find(b => !b.start);
                 const isToday = dateStr === data.today;
                 items.forEach(i => {
                     i.date = dateStr;
@@ -749,9 +770,15 @@
                     const booked = (data.bookings && data.bookings[i.slot]) || 0;
                     i.remaining = typeof i.capacity === 'number' ? Math.max(i.capacity - booked, 0) : null;
                     i.past = isToday && timeKey(i.start) <= nowMinutes();
-                    i.bookable = !closed && i.status !== '休講' && !i.past && i.remaining !== 0;
+                    const block = dayBlock || blocks.find(b => {
+                        const s = timeKey(b.start), e = b.end ? timeKey(b.end) : 24 * 60, t = timeKey(i.start);
+                        return t >= s && t < e;
+                    });
+                    i.blocked = !!block;
+                    if (block && block.message && !i.message) i.message = block.message;
+                    i.bookable = !closed && i.status !== '休講' && !i.past && !i.blocked && i.remaining !== 0;
                 });
-                return { day, closed, notices, items, hasMonth: data.lessons.some(l => l.month === month) };
+                return { day, closed, dayBlock, notices, items, hasMonth: data.lessons.some(l => l.month === month) };
             }
 
             function renderDay(dateStr, data) {
@@ -760,30 +787,44 @@
                 let html = info.notices.map(n => `<p class="p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-sm rounded">${esc(n)}</p>`).join('');
 
                 if (info.closed) {
-                    html += `<p class="p-4 text-center font-bold text-red-600 bg-red-50 rounded-lg">休館日${info.closed.message && info.closed.message !== '休館日' ? '：' + esc(info.closed.message) : ''}</p>`;
+                    html += `<div class="p-8 text-center bg-red-50 rounded-xl"><p class="text-lg font-bold text-red-600">休館日</p>${info.closed.message && info.closed.message !== '休館日' ? `<p class="text-sm text-red-500 mt-1">${esc(info.closed.message)}</p>` : ''}</div>`;
                 } else if (!info.hasMonth) {
-                    html += '<p class="p-4 text-center text-gray-500">この月のスケジュールは準備中です。</p>';
+                    html += '<p class="p-8 text-center text-gray-500 bg-gray-50 rounded-xl">この月のスケジュールは準備中です。</p>';
                 } else if (info.items.length === 0) {
-                    html += '<p class="p-4 text-center text-gray-500">この日のレッスンはありません。</p>';
+                    html += '<p class="p-8 text-center text-gray-500 bg-gray-50 rounded-xl">この日のレッスンはありません。</p>';
                 } else {
+                    if (info.dayBlock) {
+                        html += `<p class="p-3 bg-gray-100 text-gray-700 text-sm rounded-lg">この日はWEBからのご予約を受け付けておりません。${info.dayBlock.message ? esc(info.dayBlock.message) : ''}</p>`;
+                    }
                     html += info.items.map((i, idx) => {
                         const cancelled = i.status === '休講';
                         const color = cancelled ? '#d1d5db' : (LESSON_COLORS[i.color] || '#008374');
-                        const badge = i.status ? `<span class="ml-2 text-xs font-bold px-2 py-0.5 rounded ${cancelled ? 'bg-red-600 text-white' : 'bg-yellow-300 text-yellow-900'}">${esc(i.status)}</span>` : '';
-                        let right = '';
-                        if (cancelled) right = '<span class="text-xs text-gray-500">休講</span>';
-                        else if (i.past) right = '<span class="text-xs text-gray-400">受付終了</span>';
-                        else if (i.remaining === 0) right = '<span class="text-xs font-bold text-red-600">満席</span>';
-                        else right = `<span class="text-xs font-bold brand-teal">${i.remaining !== null ? `残り${i.remaining}名<br>` : ''}予約する ›</span>`;
+                        const badge = i.status ? `<span class="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full ${cancelled ? 'bg-red-600 text-white' : 'bg-amber-100 text-amber-800'}">${esc(i.status)}</span>` : '';
+                        const minutes = timeKey(i.end) - timeKey(i.start);
+                        const tags = [
+                            minutes > 0 ? `<span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${minutes}分</span>` : '',
+                            i.remaining !== null && i.bookable ? `<span class="text-[11px] px-2 py-0.5 rounded-full ${i.remaining <= 2 ? 'bg-orange-100 text-orange-700 font-bold' : 'bg-teal-50 text-teal-700'}">残り${i.remaining}名</span>` : '',
+                            badge
+                        ].join('');
+                        let action;
+                        if (cancelled) action = '<span class="state-pill bg-gray-100 text-gray-500">休講</span>';
+                        else if (i.past) action = '<span class="state-pill bg-gray-100 text-gray-400">受付終了</span>';
+                        else if (i.blocked) action = '<span class="state-pill bg-gray-100 text-gray-500">予約不可</span>';
+                        else if (i.remaining === 0) action = '<span class="state-pill bg-red-50 text-red-600">満席</span>';
+                        else action = '<span class="state-pill bg-brand-teal text-white shadow-sm">予約</span>';
                         return `
-                            <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-stretch rounded-lg overflow-hidden border bg-white ${i.bookable ? 'hover:shadow-md hover:border-teal-400 cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
-                                <div class="w-2 shrink-0" style="background:${color}"></div>
-                                <div class="flex-1 p-3">
-                                    <p class="text-sm text-gray-500 ${cancelled ? 'line-through' : ''}">${esc(i.start)}〜${esc(i.end)}</p>
-                                    <p class="font-bold ${cancelled ? 'line-through text-gray-500' : 'text-gray-800'}">${esc(i.name)} <span class="text-yellow-500">${esc(i.intensity)}</span>${badge}</p>
+                            <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-center gap-3 rounded-xl border bg-white p-3 transition ${i.bookable ? 'hover:shadow-md hover:border-teal-400 active:scale-[0.99]' : 'bg-gray-50 cursor-not-allowed'}">
+                                <div class="w-14 shrink-0 text-center ${i.bookable ? '' : 'opacity-50'}">
+                                    <p class="text-lg font-bold leading-tight ${cancelled ? 'line-through' : ''}" style="color:${i.bookable ? color : '#6b7280'}">${esc(i.start)}</p>
+                                    <p class="text-[11px] text-gray-400">〜${esc(i.end)}</p>
+                                </div>
+                                <div class="w-1 self-stretch rounded-full shrink-0" style="background:${color}"></div>
+                                <div class="flex-1 min-w-0 ${i.bookable ? '' : 'opacity-60'}">
+                                    <p class="font-bold leading-snug ${cancelled ? 'line-through text-gray-500' : 'text-gray-800'}">${esc(i.name)}</p>
+                                    <div class="flex flex-wrap items-center gap-1 mt-1">${i.intensity ? `<span class="text-amber-500 text-sm mr-1">${esc(i.intensity)}</span>` : ''}${tags}</div>
                                     ${i.message ? `<p class="text-xs text-red-600 mt-1">${esc(i.message)}</p>` : ''}
                                 </div>
-                                <div class="shrink-0 px-3 flex items-center text-right">${right}</div>
+                                <div class="shrink-0">${action}</div>
                             </button>`;
                     }).join('');
                 }
@@ -861,21 +902,38 @@
 
                 tabs.innerHTML = dates.map((ds, i) => {
                     const d = new Date(ds + 'T00:00:00');
-                    const hasChange = data.changes.some(c => c.date === ds);
-                    const dayColor = d.getDay() === 0 ? 'text-red-600' : d.getDay() === 6 ? 'text-blue-600' : '';
-                    return `<button type="button" data-date="${ds}" class="lesson-tab shrink-0 px-3 py-2 rounded-lg border text-sm font-bold ${dayColor}">
-                        ${i === 0 ? '今日' : `${d.getMonth() + 1}/${d.getDate()}`}<br><span class="text-xs">${WEEKDAYS[d.getDay()]}${hasChange ? ' ●' : ''}</span>
+                    const closedDay = data.changes.some(c => c.date === ds && c.type === '休館日');
+                    const hasChange = data.changes.some(c => c.date === ds && c.type !== '休館日');
+                    const dayColor = d.getDay() === 0 ? 'text-red-500' : d.getDay() === 6 ? 'text-blue-500' : 'text-gray-500';
+                    return `<button type="button" data-date="${ds}" class="lesson-tab shrink-0 w-14 py-2 rounded-xl border bg-white text-center ${closedDay ? 'opacity-50' : ''}">
+                        <span class="tab-sub block text-[11px] font-bold ${dayColor}">${i === 0 ? '今日' : WEEKDAYS[d.getDay()]}</span>
+                        <span class="block text-lg font-bold leading-tight">${d.getDate()}</span>
+                        <span class="tab-sub block text-[10px] h-3 leading-3 ${closedDay ? 'text-gray-500' : 'text-red-500'}">${closedDay ? '休館' : hasChange ? '●' : ''}</span>
                     </button>`;
                 }).join('');
 
+                const hoursFor = ds => {
+                    const day = WEEKDAYS[new Date(ds + 'T00:00:00').getDay()];
+                    const note = (data.notes || []).find(n => {
+                        const m = n.label.match(/営業時間（(.+)）/);
+                        if (!m) return false;
+                        const spec = m[1];
+                        if (spec.includes('〜')) {
+                            const order = '月火水木金土日';
+                            const [a, b] = spec.split('〜');
+                            return order.indexOf(day) >= order.indexOf(a) && order.indexOf(day) <= order.indexOf(b);
+                        }
+                        return spec.includes(day);
+                    });
+                    return note ? `営業時間 ${note.value}` : '';
+                };
+
                 const select = ds => {
                     selectedDate = ds;
-                    tabs.querySelectorAll('.lesson-tab').forEach(b => {
-                        const active = b.dataset.date === ds;
-                        b.classList.toggle('bg-brand-teal', active);
-                        b.classList.toggle('text-white', active);
-                        b.classList.toggle('bg-white', !active);
-                    });
+                    const d = new Date(ds + 'T00:00:00');
+                    document.getElementById('lesson-month-label').textContent = `${d.getFullYear()}年${d.getMonth() + 1}月`;
+                    document.getElementById('lesson-day-hours').textContent = `${mdLabel(ds)}　${hoursFor(ds)}`;
+                    tabs.querySelectorAll('.lesson-tab').forEach(b => b.classList.toggle('active', b.dataset.date === ds));
                     renderDay(ds, data);
                 };
                 tabs.onclick = e => {
