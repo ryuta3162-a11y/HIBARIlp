@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JOYFIT YOGA フレスポひばりが丘 各種申請専用ページ</title>
+    <title>JOYFIT YOGA フレスポひばりが丘 レッスン予約</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,29 +117,41 @@
         <div id="page-top" class="card max-w-2xl mx-auto">
             <div class="p-8 sm:p-12 text-center">
                 <header>
-                    <h1 class="text-3xl font-bold brand-teal">各種申請専用ページ</h1>
+                    <h1 class="text-3xl font-bold brand-teal">レッスン予約</h1>
                     <p class="mt-2 text-gray-600">JOYFIT YOGA フレスポひばりが丘</p>
-
-                    <!-- レッスンプログラムリンク -->
-                    <div class="mt-8 mb-4">
-                        <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="inline-block w-full sm:w-auto bg-brand-teal text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                            今月のレッスンプログラムはこちら
-                        </a>
-                    </div>
                 </header>
 
-                <nav id="form-menu" class="mt-10 flex flex-col gap-8">
-                    <!-- 未入会者様向けメニュー -->
-                    <div>
-                        <h3 class="text-lg font-bold brand-teal mb-4 pb-2 border-b-2 border-teal-200 text-center">初めてご利用の方</h3>
-                        <div class="grid grid-cols-1 gap-5 mt-4">
-                            <button data-form="form-trial" class="menu-button w-full font-bold p-6 rounded-xl bg-brand-teal text-white hover:bg-brand-teal-dark text-xl text-center transition-all duration-300 ease-in-out transform hover:scale-105">
-                                ▶ スタジオレッスン体験
-                            </button>
+                <!-- レッスン予約（スプレッドシート「レッスン一覧」「休講・変更」から取得） -->
+                <section id="lesson-schedule" class="mt-8 text-left">
+                    <p class="text-sm text-gray-600 text-center mb-4">日付を選んで、ご希望のレッスンをタップしてください。</p>
+                    <div id="lesson-changes" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                        <p class="font-bold text-red-700 mb-2">休講・変更のお知らせ</p>
+                        <ul id="lesson-changes-list" class="text-sm text-red-700 space-y-1"></ul>
+                    </div>
+                    <div id="lesson-day-tabs" class="flex gap-2 overflow-x-auto pb-2"></div>
+                    <div id="lesson-day-body" class="mt-4 space-y-2">
+                        <p id="lesson-loading" class="p-6 text-center text-gray-500">スケジュールを読み込んでいます...</p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">★初級／★★中級／★★★上級　溶岩浴：インストラクター不在の溶岩スタジオ内で、ゆっくりとお休みいただくお時間です。<br>※内容は変更になる場合がございます。</p>
+                </section>
+
+                <!-- レッスン選択後の予約区分選択 -->
+                <div id="booking-sheet" class="hidden fixed inset-0 z-40 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4">
+                    <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 text-left">
+                        <p class="text-xs text-gray-500">選択中のレッスン</p>
+                        <p id="booking-lesson-label" class="font-bold text-lg text-gray-800 mt-1"></p>
+                        <p id="booking-lesson-note" class="text-xs text-gray-500 mt-1"></p>
+                        <div class="mt-5 space-y-3">
+                            <button type="button" id="book-trial" class="w-full font-bold py-4 rounded-xl bg-brand-teal text-white hover:bg-brand-teal-dark disabled:opacity-40 disabled:cursor-not-allowed">初めての方（体験予約）</button>
+                            <p id="book-trial-reason" class="hidden text-xs text-red-600 -mt-2"></p>
+                            <button type="button" id="book-hiatus" class="w-full font-bold py-4 rounded-xl bg-white border-2 border-brand-teal brand-teal hover:bg-teal-50 disabled:opacity-40 disabled:cursor-not-allowed">休会中の方（1回受講予約）</button>
+                            <p id="book-hiatus-reason" class="hidden text-xs text-red-600 -mt-2"></p>
+                            <button type="button" id="book-close" class="w-full py-3 text-gray-500">閉じる</button>
                         </div>
                     </div>
-                    
-                    <!-- 既存会員様向けメニュー -->
+                </div>
+
+                <nav id="form-menu" class="mt-12 flex flex-col gap-8">
                     <div>
                         <h3 class="text-lg font-bold text-lime-800 mb-3 pb-2 border-b-2 border-lime-400 text-center">各種お手続き</h3>
                         
@@ -152,9 +164,8 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <button data-form="form-cancel" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-red-50 border border-red-200 text-red-700 hover:border-red-400 hover:bg-red-100 text-center">▶ レッスン予約キャンセル</button>
-                            <button data-form="form-hiatus" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ 休会中1回受講予約</button>
                             <button data-form="form-lost" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ 忘れ物お問い合わせ</button>
-                            <button data-form="form-este" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center">▶ セルフエステ利用申請</button>
+                            <button data-form="form-este" class="menu-button w-full font-semibold py-4 px-5 rounded-lg bg-white border border-gray-300 text-gray-700 hover:border-brand-teal hover:text-brand-teal text-center sm:col-span-2">▶ セルフエステ利用申請</button>
                         </div>
                     </div>
                 </nav>
@@ -193,20 +204,11 @@
                             <p class="text-xs text-gray-500 mt-1">※同意いただけない場合、ご体験いただくことはできません。</p>
                         </div>
                         <div>
-                            <label class="form-label">体験希望日<span class="required-mark">*</span></label>
-                            <div class="p-4 bg-gray-50 rounded-lg border text-sm space-y-3">
-                                <p class="text-center mb-2">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
-                                <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                                    今月のレッスンプログラムはこちら
-                                </a>
-                                <div class="text-xs mt-3">
-                                    <p class="font-bold text-center">【★の数で強度が異なります】</p>
-                                    <p class="text-center">★：初心者向け／★★：中級者向け／★★★：上級者向け</p>
-                                    <p class="text-center">溶岩浴：インストラクター不在の溶岩スタジオ内で、ゆっくりとお休みいただくお時間です。</p>
-                                </div>
-                            </div>
-                            <input type="text" name="lesson_datetime" class="form-input mt-4" placeholder="例: 〇月〇日 10:00〜" required>
-                             <p class="text-xs text-gray-500 mt-2">※日付と開始時間を入力してください。<br>※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。<br>※体験当日はレッスン開始15分前には店頭にお越しいただき、インターフォンを押してください。</p>
+                            <label class="form-label">体験レッスン<span class="required-mark">*</span></label>
+                            <input type="text" name="lesson_datetime" class="form-input selected-lesson-input" readonly required placeholder="レッスンが選択されていません">
+                            <input type="hidden" name="lesson_slot" class="selected-lesson-slot">
+                            <button type="button" class="back-to-menu text-sm brand-teal underline mt-2">レッスンを選び直す</button>
+                            <p class="text-xs text-gray-500 mt-2">※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。<br>※体験当日はレッスン開始15分前には店頭にお越しいただき、インターフォンを押してください。</p>
                         </div>
                         <div>
                             <label class="form-label">ご参加希望人数 ※2名様まで<span class="required-mark">*</span></label>
@@ -380,11 +382,6 @@
                               <p>※黄色「パーソナル 要予約」枠はご希望日の<strong class="font-semibold">1週間前まで</strong>にお済ませください。<br>例：7月14日(月)に予約希望の場合、7月7日(月)23:59までにご予約。</p>
                               <p>※緑色「ピラティスリフォーマー（マシンピラティス）グループレッスン」枠は<strong class="font-semibold">前月15日（営業時間内）まで</strong>にお済ませください。<br>例：8月中の緑色枠予約希望の場合、7月15日（火）22:00までにご予約。</p>
                          </div>
-                         <div class="p-4 bg-gray-50 rounded-lg border text-center">
-                            <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                                今月のレッスンプログラムはこちら
-                            </a>
-                         </div>
                          <p class="info-box">【料金(税込)】<br>30分間：3,300円／60分間：6,600円<br><span class="text-xs">※翌月の月会費と合算請求させていただきます。※当日はチケットの発券は不要です。</span></p>
                     </div>
                     <form class="mt-8 space-y-6">
@@ -494,15 +491,11 @@
                             <input type="tel" id="hiatus-phone" name="phone" class="form-input" required>
                         </div>
                         <div>
-                            <label for="hiatus-datetime" class="form-label">希望日時<span class="required-mark">*</span></label>
-                            <div class="p-4 bg-gray-50 rounded-lg border">
-                                <p class="text-sm text-center mb-2">下記レッスンプログラムをご覧いただき、ご希望の日付・レッスン開始時刻をご入力ください。</p>
-                                <a href="https://docs.google.com/presentation/d/195N1NhcN8iiJnpoL0liaquU-PZL5LSN0sPHg1X72a40/edit?usp=sharing" target="_blank" class="block w-full text-center bg-brand-teal text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-brand-teal-dark hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200">
-                                    今月のレッスンプログラムはこちら
-                                </a>
-                            </div>
-                            <input type="text" id="hiatus-datetime" name="lesson_datetime" class="form-input mt-4" placeholder="例: 〇月〇日 10:00〜" required>
-                            <p class="text-xs text-gray-500 mt-2">※日付と開始時間を入力してください。<br>※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。</p>
+                            <label for="hiatus-datetime" class="form-label">受講レッスン<span class="required-mark">*</span></label>
+                            <input type="text" id="hiatus-datetime" name="lesson_datetime" class="form-input selected-lesson-input" readonly required placeholder="レッスンが選択されていません">
+                            <input type="hidden" name="lesson_slot" class="selected-lesson-slot">
+                            <button type="button" class="back-to-menu text-sm brand-teal underline mt-2">レッスンを選び直す</button>
+                            <p class="text-xs text-gray-500 mt-2">※予約状況により、ご希望の日程でのご案内ができかねる場合がございます。その場合は当館よりご連絡させていただきます。</p>
                         </div>
                          <div>
                             <label for="hiatus-remarks" class="form-label">ご質問・備考</label>
@@ -672,8 +665,250 @@
             const responseMessage = document.getElementById('response-message');
             const fabBackToMenu = document.getElementById('fab-back-to-menu');
             
-            // ★ GASウェブアプリのURL（ひばりが丘店用） ★
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nKZyZU2MyBWdE0lnoBA8LCwcAVvHZ/exec';
+            // ★ GASウェブアプリのURL（v2 予約ページ用デプロイ） ★
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbw_bG0_59Cs7VEQRUhao7PvtQpf5QcB2hn_2Fsctuq6r2Rzr_domOwRAkpBeSWPRpSOBg/exec';
+
+            // ===== レッスン予約 =====
+            const LESSON_COLORS = {
+                orange: '#ED7D31', blue: '#1F9BB8', magenta: '#E61EDC',
+                green: '#00B050', gray: '#A6A6A6', yellow: '#FFD966'
+            };
+            const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+            const SCHEDULE_DAYS = 14;
+            let scheduleData = null;
+            let selectedDate = '';
+            let selectedLesson = null;
+
+            function esc(s) {
+                return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            }
+            function ymd(d) {
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            }
+            function timeKey(t) {
+                const [h, m] = String(t || '0:0').split(':').map(Number);
+                return h * 60 + (m || 0);
+            }
+            function daysBetween(fromStr, toStr) {
+                return Math.round((new Date(toStr + 'T00:00:00') - new Date(fromStr + 'T00:00:00')) / 86400000);
+            }
+            function mdLabel(dateStr) {
+                const d = new Date(dateStr + 'T00:00:00');
+                return `${d.getMonth() + 1}/${d.getDate()}(${WEEKDAYS[d.getDay()]})`;
+            }
+            function changeText(c) {
+                const target = c.target ? `${c.target.start}〜 ${c.target.name}` : '';
+                switch (c.type) {
+                    case '休講': return `${target} 休講`;
+                    case '時間変更': return `${target} → ${c.newStart}〜${c.newEnd} に時間変更`;
+                    case 'レッスン変更': return `${target} → ${c.newName} に変更`;
+                    case '代行': return `${target} 代行`;
+                    case '追加': return `${c.newStart}〜${c.newEnd} ${c.newName} を追加`;
+                    case '休館日': return '休館日';
+                    default: return '';
+                }
+            }
+            function nowMinutes() {
+                const n = new Date();
+                return n.getHours() * 60 + n.getMinutes();
+            }
+
+            function buildDay(dateStr, data) {
+                const d = new Date(dateStr + 'T00:00:00');
+                const day = WEEKDAYS[d.getDay()];
+                const month = dateStr.slice(0, 7);
+                const changes = data.changes.filter(c => c.date === dateStr);
+                const closed = changes.find(c => c.type === '休館日');
+                const notices = changes.filter(c => c.type === 'お知らせ' && c.message).map(c => c.message);
+
+                let items = data.lessons
+                    .filter(l => l.day === day && l.month === month)
+                    .map(l => ({ ...l, status: '', message: '' }));
+
+                changes.forEach(c => {
+                    if (c.type === '追加') {
+                        items.push({ start: c.newStart, end: c.newEnd, name: c.newName, intensity: '', capacity: '', color: 'blue', status: '追加', message: c.message });
+                        return;
+                    }
+                    if (!c.target) return;
+                    const item = items.find(i => i.start === c.target.start);
+                    if (!item) return;
+                    item.message = c.message;
+                    if (c.type === '休講') item.status = '休講';
+                    if (c.type === '時間変更') { item.status = '時間変更'; item.start = c.newStart || item.start; item.end = c.newEnd || item.end; }
+                    if (c.type === 'レッスン変更') { item.status = '変更'; item.name = c.newName || item.name; }
+                    if (c.type === '代行') item.status = '代行';
+                });
+                items.sort((a, b) => timeKey(a.start) - timeKey(b.start));
+
+                const isToday = dateStr === data.today;
+                items.forEach(i => {
+                    i.date = dateStr;
+                    i.slot = `${dateStr} ${i.start}`;
+                    i.isPersonal = i.name.includes('パーソナル');
+                    const booked = (data.bookings && data.bookings[i.slot]) || 0;
+                    i.remaining = typeof i.capacity === 'number' ? Math.max(i.capacity - booked, 0) : null;
+                    i.past = isToday && timeKey(i.start) <= nowMinutes();
+                    i.bookable = !closed && i.status !== '休講' && !i.past && i.remaining !== 0;
+                });
+                return { day, closed, notices, items, hasMonth: data.lessons.some(l => l.month === month) };
+            }
+
+            function renderDay(dateStr, data) {
+                const body = document.getElementById('lesson-day-body');
+                const info = buildDay(dateStr, data);
+                let html = info.notices.map(n => `<p class="p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 text-sm rounded">${esc(n)}</p>`).join('');
+
+                if (info.closed) {
+                    html += `<p class="p-4 text-center font-bold text-red-600 bg-red-50 rounded-lg">休館日${info.closed.message && info.closed.message !== '休館日' ? '：' + esc(info.closed.message) : ''}</p>`;
+                } else if (!info.hasMonth) {
+                    html += '<p class="p-4 text-center text-gray-500">この月のスケジュールは準備中です。</p>';
+                } else if (info.items.length === 0) {
+                    html += '<p class="p-4 text-center text-gray-500">この日のレッスンはありません。</p>';
+                } else {
+                    html += info.items.map((i, idx) => {
+                        const cancelled = i.status === '休講';
+                        const color = cancelled ? '#d1d5db' : (LESSON_COLORS[i.color] || '#008374');
+                        const badge = i.status ? `<span class="ml-2 text-xs font-bold px-2 py-0.5 rounded ${cancelled ? 'bg-red-600 text-white' : 'bg-yellow-300 text-yellow-900'}">${esc(i.status)}</span>` : '';
+                        let right = '';
+                        if (cancelled) right = '<span class="text-xs text-gray-500">休講</span>';
+                        else if (i.past) right = '<span class="text-xs text-gray-400">受付終了</span>';
+                        else if (i.remaining === 0) right = '<span class="text-xs font-bold text-red-600">満席</span>';
+                        else right = `<span class="text-xs font-bold brand-teal">${i.remaining !== null ? `残り${i.remaining}名<br>` : ''}予約する ›</span>`;
+                        return `
+                            <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-stretch rounded-lg overflow-hidden border bg-white ${i.bookable ? 'hover:shadow-md hover:border-teal-400 cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
+                                <div class="w-2 shrink-0" style="background:${color}"></div>
+                                <div class="flex-1 p-3">
+                                    <p class="text-sm text-gray-500 ${cancelled ? 'line-through' : ''}">${esc(i.start)}〜${esc(i.end)}</p>
+                                    <p class="font-bold ${cancelled ? 'line-through text-gray-500' : 'text-gray-800'}">${esc(i.name)} <span class="text-yellow-500">${esc(i.intensity)}</span>${badge}</p>
+                                    ${i.message ? `<p class="text-xs text-red-600 mt-1">${esc(i.message)}</p>` : ''}
+                                </div>
+                                <div class="shrink-0 px-3 flex items-center text-right">${right}</div>
+                            </button>`;
+                    }).join('');
+                }
+                body.innerHTML = html;
+                body.onclick = e => {
+                    const btn = e.target.closest('.lesson-item');
+                    if (!btn || btn.disabled) return;
+                    openBookingSheet(info.items[Number(btn.dataset.idx)]);
+                };
+            }
+
+            function lessonDisplay(l) {
+                const d = new Date(l.date + 'T00:00:00');
+                return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}(${WEEKDAYS[d.getDay()]}) ${l.start}〜${l.end} ${l.name}`;
+            }
+
+            function setReason(id, text) {
+                const el = document.getElementById(id);
+                el.textContent = text;
+                el.classList.toggle('hidden', !text);
+            }
+
+            function openBookingSheet(lesson) {
+                if (lesson.isPersonal) {
+                    showForm('form-pilates');
+                    return;
+                }
+                selectedLesson = lesson;
+                const daysAhead = daysBetween(scheduleData.today, lesson.date);
+                const isPilates = lesson.name.includes('ピラティス');
+                const trialBtn = document.getElementById('book-trial');
+                const hiatusBtn = document.getElementById('book-hiatus');
+
+                const trialReason = isPilates && daysAhead < 2 ? 'マシンピラティスの体験予約はご希望日の2日前23:59までです。' : '';
+                const hiatusReason = daysAhead < 1 ? '休会中1回受講予約はご希望日の前日までです。' : '';
+                trialBtn.disabled = !!trialReason;
+                hiatusBtn.disabled = !!hiatusReason;
+                setReason('book-trial-reason', trialReason);
+                setReason('book-hiatus-reason', hiatusReason);
+
+                document.getElementById('booking-lesson-label').textContent = lessonDisplay(lesson);
+                document.getElementById('booking-lesson-note').textContent =
+                    [lesson.remaining !== null ? `残り${lesson.remaining}名` : '', lesson.note].filter(Boolean).join('　');
+                document.getElementById('booking-sheet').classList.remove('hidden');
+            }
+
+            function closeBookingSheet() {
+                document.getElementById('booking-sheet').classList.add('hidden');
+            }
+
+            function startBooking(formId) {
+                if (!selectedLesson) return;
+                const section = document.getElementById(formId);
+                section.querySelector('.selected-lesson-input').value = lessonDisplay(selectedLesson);
+                section.querySelector('.selected-lesson-slot').value = selectedLesson.slot;
+                closeBookingSheet();
+                showForm(formId);
+            }
+
+            document.getElementById('book-trial').addEventListener('click', () => startBooking('form-trial'));
+            document.getElementById('book-hiatus').addEventListener('click', () => startBooking('form-hiatus'));
+            document.getElementById('book-close').addEventListener('click', closeBookingSheet);
+            document.getElementById('booking-sheet').addEventListener('click', e => {
+                if (e.target.id === 'booking-sheet') closeBookingSheet();
+            });
+
+            function renderSchedule(data) {
+                scheduleData = data;
+                const tabs = document.getElementById('lesson-day-tabs');
+                const start = new Date(data.today + 'T00:00:00');
+                const dates = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
+                    const d = new Date(start); d.setDate(start.getDate() + i); return ymd(d);
+                });
+                if (!dates.includes(selectedDate)) selectedDate = dates[0];
+
+                tabs.innerHTML = dates.map((ds, i) => {
+                    const d = new Date(ds + 'T00:00:00');
+                    const hasChange = data.changes.some(c => c.date === ds);
+                    const dayColor = d.getDay() === 0 ? 'text-red-600' : d.getDay() === 6 ? 'text-blue-600' : '';
+                    return `<button type="button" data-date="${ds}" class="lesson-tab shrink-0 px-3 py-2 rounded-lg border text-sm font-bold ${dayColor}">
+                        ${i === 0 ? '今日' : `${d.getMonth() + 1}/${d.getDate()}`}<br><span class="text-xs">${WEEKDAYS[d.getDay()]}${hasChange ? ' ●' : ''}</span>
+                    </button>`;
+                }).join('');
+
+                const select = ds => {
+                    selectedDate = ds;
+                    tabs.querySelectorAll('.lesson-tab').forEach(b => {
+                        const active = b.dataset.date === ds;
+                        b.classList.toggle('bg-brand-teal', active);
+                        b.classList.toggle('text-white', active);
+                        b.classList.toggle('bg-white', !active);
+                    });
+                    renderDay(ds, data);
+                };
+                tabs.onclick = e => {
+                    const btn = e.target.closest('.lesson-tab');
+                    if (btn) select(btn.dataset.date);
+                };
+                select(selectedDate);
+
+                const notices = data.changes
+                    .filter(c => c.type !== 'お知らせ')
+                    .sort((a, b) => a.date.localeCompare(b.date) || timeKey(a.target && a.target.start) - timeKey(b.target && b.target.start));
+                document.getElementById('lesson-changes-list').innerHTML = notices.map(c =>
+                    `<li><span class="font-bold">${mdLabel(c.date)}</span> ${esc(changeText(c))}${c.message && c.type !== '休館日' ? `（${esc(c.message)}）` : ''}</li>`
+                ).join('');
+                document.getElementById('lesson-changes').classList.toggle('hidden', notices.length === 0);
+            }
+
+            function loadSchedule() {
+                return fetch(`${webAppUrl}?action=lessons`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.result !== 'success') throw new Error(data.message || 'failed');
+                        renderSchedule(data);
+                    })
+                    .catch(err => {
+                        console.warn('レッスンスケジュールの取得に失敗:', err);
+                        if (!scheduleData) {
+                            document.getElementById('lesson-day-body').innerHTML =
+                                '<p class="p-6 text-center text-red-600">スケジュールを読み込めませんでした。時間をおいて再度お試しください。</p>';
+                        }
+                    });
+            }
+            loadSchedule();
 
             // URLパラメータによる初期表示制御
             const urlParams = new URLSearchParams(window.location.search);
@@ -1034,6 +1269,7 @@
                         }
                         showResponseMessage('送信が完了しました。', true);
                         backToMenu();
+                        loadSchedule();
                     } else {
                         // サーバーがエラー（success以外）を返した場合
                         // catchブロックではなくここでエラーを投げて、下の.catchで処理させる

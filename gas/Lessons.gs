@@ -278,6 +278,70 @@ function readNotes_(sheet) {
     .map(function(r) { return { label: String(r[0]), value: String(r[1]) }; });
 }
 
+/* ===============================================================
+ * 予約数カウント（v2予約ページ）
+ * =============================================================== */
+
+const BOOKING_SHEETS = ['体験予約フォーム', '休会中1回受講予約'];
+const WEEKDAY_CHARS = ['日', '月', '火', '水', '木', '金', '土'];
+
+function ensureHeader_(sheet, header) {
+  const lastCol = Math.max(sheet.getLastColumn(), 1);
+  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  if (headers.indexOf(header) === -1) {
+    sheet.getRange(1, lastCol + 1).setValue(header);
+  }
+}
+
+/**
+ * { 'yyyy-MM-dd H:mm': 予約数 } を返す（キャンセル申請済みは除外）
+ */
+function countBookings_(ss, fromDate) {
+  const counts = {};
+  BOOKING_SHEETS.forEach(function(name) {
+    const sheet = ss.getSheetByName(name);
+    if (!sheet || sheet.getLastRow() < 2) return;
+    const values = sheet.getDataRange().getValues();
+    const headers = values[0].map(String);
+    const slotIdx = headers.indexOf('lesson_slot');
+    if (slotIdx === -1) return;
+    const remarkIdxs = headers.map(function(h, i) { return (h.indexOf('備考') !== -1 || h === 'remarks') ? i : -1; })
+      .filter(function(i) { return i !== -1; });
+
+    for (let r = 1; r < values.length; r++) {
+      const slot = String(values[r][slotIdx] || '').trim();
+      if (!slot || (fromDate && slot.slice(0, 10) < fromDate)) continue;
+      const cancelled = remarkIdxs.some(function(i) {
+        return String(values[r][i]).indexOf('【キャンセル申請あり】') !== -1;
+      });
+      if (cancelled) continue;
+      counts[slot] = (counts[slot] || 0) + 1;
+    }
+  });
+  return counts;
+}
+
+function findCapacity_(ss, slot) {
+  const lessonSheet = ss.getSheetByName(LESSON_SHEET_NAME);
+  if (!lessonSheet) return null;
+  const date = slot.slice(0, 10);
+  const start = slot.slice(11);
+  const d = new Date(date + 'T00:00:00+09:00');
+  const day = WEEKDAY_CHARS[Number(Utilities.formatDate(d, 'Asia/Tokyo', 'u')) % 7];
+  const month = date.slice(0, 7);
+  const lesson = readLessons_(lessonSheet).filter(function(l) {
+    return l.month === month && l.day === day && l.start === start;
+  })[0];
+  return lesson && typeof lesson.capacity === 'number' ? lesson.capacity : null;
+}
+
+function isSlotFull_(ss, slot) {
+  const capacity = findCapacity_(ss, slot);
+  if (capacity === null) return false;
+  const counts = countBookings_(ss, slot.slice(0, 10));
+  return (counts[slot] || 0) >= capacity;
+}
+
 /**
  * LP向けデータ（doGet?action=lessons）
  */
@@ -291,6 +355,7 @@ function getLessonData() {
     today: today,
     lessons: lessonSheet ? readLessons_(lessonSheet) : [],
     notes: lessonSheet ? readNotes_(lessonSheet) : [],
-    changes: changeSheet ? readChanges_(changeSheet).filter(function(c) { return c.date >= today; }) : []
+    changes: changeSheet ? readChanges_(changeSheet).filter(function(c) { return c.date >= today; }) : [],
+    bookings: countBookings_(ss, today)
   };
 }

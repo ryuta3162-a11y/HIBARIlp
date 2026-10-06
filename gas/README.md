@@ -20,6 +20,13 @@
 https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nKZyZU2MyBWdE0lnoBA8LCwcAVvHZ/exec
 ```
 
+## v2 予約ページ
+
+- ページ: `/v2/`（https://yogahibarigaoka-page.vercel.app/v2/）
+- Web アプリ: デプロイ `AKfycbw_bG0_...`（@22 以降、v2 専用）。本番 `/`（@21）とは別デプロイ
+- `doGet?action=lessons` で「レッスン一覧」「休講・変更」と予約数を返す
+- 体験・休会中予約は `lesson_slot`（`yyyy-MM-dd H:mm`）付きで送信し、定員超過は doPost で拒否
+
 ## formType 対応表（index.html ↔ GAS）
 
 | index.html `formType` | スプレッドシートシート名 |

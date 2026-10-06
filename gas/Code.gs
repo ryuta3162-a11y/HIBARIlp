@@ -130,6 +130,19 @@ function doPost(e) {
       }
     }
 
+    // v2予約ページからの予約（lesson_slot付き）は定員チェックを行う
+    let lock = null;
+    if (params.lesson_slot) {
+      lock = LockService.getScriptLock();
+      lock.waitLock(20000);
+      ensureHeader_(sheet, 'lesson_slot');
+      const full = isSlotFull_(spreadsheet, params.lesson_slot);
+      if (full) {
+        lock.releaseLock();
+        throw new Error('選択されたレッスンは満席のため、ご予約できませんでした。別のレッスンをお選びください。');
+      }
+    }
+
     // スプレッドシートにデータを記録
     const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     const newRow = new Array(headers.length).fill('');
@@ -147,6 +160,7 @@ function doPost(e) {
     if (newRow[0] === '') newRow[0] = now;
 
     sheet.appendRow(newRow);
+    if (lock) lock.releaseLock();
     const appendedRow = sheet.getLastRow();
     // 直上の行がキャンセル済み（取り消し線あり）だと、新規行に書式が引き継がれるためリセット
     resetRowFormatting(sheet, appendedRow);
