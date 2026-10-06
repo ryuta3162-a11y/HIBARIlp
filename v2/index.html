@@ -895,9 +895,13 @@
                 scheduleData = data;
                 const tabs = document.getElementById('lesson-day-tabs');
                 const start = new Date(data.today + 'T00:00:00');
-                const dates = Array.from({ length: SCHEDULE_DAYS }, (_, i) => {
-                    const d = new Date(start); d.setDate(start.getDate() + i); return ymd(d);
-                });
+                const until = data.bookingUntil || ymd(new Date(start.getFullYear(), start.getMonth(), start.getDate() + SCHEDULE_DAYS - 1));
+                const months = new Set(data.lessons.map(l => l.month));
+                const dates = [];
+                for (const d = new Date(start); ymd(d) <= until; d.setDate(d.getDate() + 1)) {
+                    const ds = ymd(d);
+                    if (ds === data.today || months.has(ds.slice(0, 7))) dates.push(ds);
+                }
                 if (!dates.includes(selectedDate)) selectedDate = dates[0];
 
                 tabs.innerHTML = dates.map((ds, i) => {
@@ -914,7 +918,9 @@
 
                 const hoursFor = ds => {
                     const day = WEEKDAYS[new Date(ds + 'T00:00:00').getDay()];
-                    const note = (data.notes || []).find(n => {
+                    const allNotes = data.notes || [];
+                    const monthNotes = allNotes.filter(n => n.month === ds.slice(0, 7));
+                    const note = (monthNotes.length ? monthNotes : allNotes).find(n => {
                         const m = n.label.match(/営業時間（(.+)）/);
                         if (!m) return false;
                         const spec = m[1];

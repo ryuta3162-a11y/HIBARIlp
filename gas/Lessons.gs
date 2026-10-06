@@ -1,7 +1,6 @@
 /**
- * レッスン一覧シートへ月間スタジオプログラムを書き込む
- * 手動実行: importLessonList
- * レッスン一覧が空のときは onOpen から自動で書き込まれる
+ * レッスン一覧（月切り替え式）・予約不可日程・休講/変更・予約数
+ * LESSONS / MONTH_NOTES / BLOCKED_SEED は初回セットアップ用（2026年10月分）
  */
 
 const LESSON_SHEET_NAME = 'レッスン一覧';
@@ -91,57 +90,26 @@ const MONTH_NOTES = [
   ['リフォーマー環境', 'ピラティスリフォーマーレッスン時は温度低め・湿度低め設定です。']
 ];
 
-function toMinutes_(hhmm) {
-  const parts = hhmm.split(':');
-  return Number(parts[0]) * 60 + Number(parts[1]);
-}
-
-function importLessonListIfEmpty() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(LESSON_SHEET_NAME);
-  if (sheet && sheet.getLastRow() >= 2) return;
-  importLessonList(ss);
-}
-
-function importLessonList(targetSpreadsheet) {
-  const ss = targetSpreadsheet || SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById(SPREADSHEET_ID);
-  let sheet = ss.getSheetByName(LESSON_SHEET_NAME);
-  if (!sheet) sheet = ss.insertSheet(LESSON_SHEET_NAME);
-  sheet.getRange(1, 1, Math.max(sheet.getMaxRows(), 2), 10).clear();
-
-  const headers = ['対象月', '曜日', '開始', '終了', '分数', 'レッスン名', '強度', '定員', '備考', '色'];
-  const rows = LESSONS.map(function(l) {
-    return [LESSON_MONTH, l[0], l[1], l[2], toMinutes_(l[2]) - toMinutes_(l[1]), l[3], l[4], l[5], l[6], l[7]];
-  });
-
-  sheet.getRange(1, 1, rows.length + 1, headers.length).setNumberFormat('@');
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers])
-    .setFontWeight('bold').setBackground('#008374').setFontColor('#ffffff');
-  sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
-  sheet.getRange(2, 5, rows.length, 1).setNumberFormat('0');
-  sheet.getRange(2, 8, rows.length, 1).setNumberFormat('0');
-
-  const nameBgs = rows.map(function(r) { return [COLOR[r[9]] || '#ffffff']; });
-  const nameFonts = rows.map(function(r) { return [r[9] === 'yellow' ? '#000000' : '#ffffff']; });
-  sheet.getRange(2, 6, rows.length, 1).setBackgrounds(nameBgs).setFontColors(nameFonts).setFontWeight('bold');
-
-  sheet.setFrozenRows(1);
-  sheet.autoResizeColumns(1, headers.length);
-  sheet.setColumnWidth(9, 360);
-  sheet.getRange(2, 9, rows.length, 1).setWrap(true);
-
-  ensureLessonSheetLayout_(sheet);
-  refreshChangeTargetValidation_(ss);
-}
-
 /* ===============================================================
- * レッスン一覧シート右側：予約不可日程（L〜Q列）と概要（S〜T列）
+ * レッスン一覧シート（月切り替え式）
+ *  A1        : 表示月（プルダウン）。切り替えると表示中の内容を保存して別の月を読み込む
+ *  A〜I列    : レッスン
+ *  L〜Q列    : 予約不可 日程一覧
+ *  S〜T列    : 概要・お知らせ
+ *  各月のデータは「月別データ」シート（非表示）に保存し、表示中の月だけはレッスン一覧が正
  * =============================================================== */
 
+const STORE_SHEET_NAME = '月別データ（編集不要）';
+const STORE_WIDTH = 10;
+const VIEW_FIRST_ROW = 3;
+const VIEW_ROWS = 200;
+const LESSON_HEADERS = ['曜日', '開始', '終了', '分数', 'レッスン名', '強度', '定員', '備考', '色'];
 const BLOCKED_COL = 12; // L
-const BLOCKED_HEADERS = ['予約不可 日付', '曜日', '開始', '終了', '理由・表示文', 'LP掲載'];
-const BLOCKED_MAX_ROWS = 300;
+const BLOCKED_HEADERS = ['日付', '曜日', '開始', '終了', '理由・表示文', 'LP掲載'];
 const NOTES_COL = 19; // S
+const NOTE_HEADERS = ['項目', '内容'];
+const WEEKDAY_ORDER = ['月', '火', '水', '木', '金', '土', '日'];
+const COLOR_LABELS = { orange: 'オレンジ', blue: '青', magenta: 'ピンク', green: '緑', gray: 'グレー', yellow: '黄' };
 
 const BLOCKED_SEED = [
   ['2026-10-05', '15:00', '16:00', ''],
@@ -158,74 +126,421 @@ const BLOCKED_SEED = [
   ['2026-10-26', '12:30', '13:30', '']
 ];
 
-function ensureLessonSheetLayout_(sheet) {
-  const current = sheet.getRange(1, BLOCKED_COL).getValue();
-  if (current === BLOCKED_HEADERS[0]) return;
+function monthLabel_(key) {
+  const p = String(key).split('-');
+  return p[0] + '年' + Number(p[1]) + '月';
+}
 
-  let notes = MONTH_NOTES;
-  if (current === '項目') {
-    const lastRow = Math.max(sheet.getLastRow(), 2);
-    notes = sheet.getRange(2, BLOCKED_COL, lastRow - 1, 2).getValues()
-      .filter(function(r) { return r[0] !== '' || r[1] !== ''; });
-    sheet.getRange(1, BLOCKED_COL, lastRow, 2).clear();
+function monthKey_(label) {
+  const m = String(label || '').match(/(\d{4})\D+(\d{1,2})/);
+  return m ? m[1] + '-' + ('0' + m[2]).slice(-2) : '';
+}
+
+function addMonths_(key, n) {
+  const p = key.split('-').map(Number);
+  const d = new Date(p[0], p[1] - 1 + n, 1);
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2);
+}
+
+function currentMonthKey_() {
+  return Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM');
+}
+
+function normDate_(s) {
+  const m = String(s || '').match(/(\d{4})\D(\d{1,2})\D(\d{1,2})/);
+  return m ? m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) : '';
+}
+
+function normTime_(s) {
+  const m = String(s || '').replace('：', ':').match(/(\d{1,2}):(\d{2})/);
+  return m ? Number(m[1]) + ':' + m[2] : '';
+}
+
+function colorLabel_(v) {
+  return COLOR_LABELS[v] || String(v || '');
+}
+
+function colorKey_(v) {
+  const s = String(v || '').trim();
+  const key = Object.keys(COLOR_LABELS).filter(function(k) { return COLOR_LABELS[k] === s; })[0];
+  return key || s;
+}
+
+function withDocumentLock_(fn) {
+  let lock = null;
+  try {
+    lock = LockService.getDocumentLock();
+    lock.waitLock(25000);
+  } catch (e) {
+    lock = null;
   }
+  try {
+    return fn();
+  } finally {
+    if (lock) lock.releaseLock();
+  }
+}
 
-  sheet.getRange(1, NOTES_COL, 1, 2).setValues([['項目', '内容']])
+/* ---------- 月別データ（保存先） ---------- */
+
+function getStoreSheet_(ss) {
+  let store = ss.getSheetByName(STORE_SHEET_NAME);
+  if (!store) {
+    store = ss.insertSheet(STORE_SHEET_NAME);
+    store.getRange(1, 1, store.getMaxRows(), STORE_WIDTH).setNumberFormat('@');
+    store.getRange(1, 1, 1, 3).setValues([['区分', '月', 'データ']]);
+    store.getRange('L1:M1').setNumberFormat('@').setValues([['表示中の月', '']]);
+    store.hideSheet();
+  }
+  return store;
+}
+
+/** [区分, 月, 値...] の配列 */
+function readStore_(store) {
+  const last = store.getLastRow();
+  if (last < 2) return [];
+  return store.getRange(2, 1, last - 1, STORE_WIDTH).getDisplayValues()
+    .filter(function(r) { return r[0] && r[1]; });
+}
+
+/** rows: [区分, 値...]（月なし） */
+function writeStoreMonth_(store, month, rows) {
+  const others = readStore_(store).filter(function(r) { return r[1] !== month; });
+  const mine = rows.map(function(r) {
+    const out = [r[0], month].concat(r.slice(1)).map(function(v) { return v === undefined || v === null ? '' : String(v); });
+    while (out.length < STORE_WIDTH) out.push('');
+    return out.slice(0, STORE_WIDTH);
+  });
+  const all = others.concat(mine);
+  const oldCount = Math.max(store.getLastRow() - 1, 0);
+  if (all.length) store.getRange(2, 1, all.length, STORE_WIDTH).setNumberFormat('@').setValues(all);
+  if (oldCount > all.length) store.getRange(2 + all.length, 1, oldCount - all.length, STORE_WIDTH).clearContent();
+}
+
+function getLoadedMonth_(store) {
+  return store ? store.getRange('M1').getDisplayValue() : '';
+}
+
+function setLoadedMonth_(store, month) {
+  store.getRange('M1').setNumberFormat('@').setValue(month);
+}
+
+function storeRowsOf_(store, month) {
+  return readStore_(store)
+    .filter(function(r) { return r[1] === month; })
+    .map(function(r) { return [r[0]].concat(r.slice(2)); });
+}
+
+/* ---------- レッスン一覧（表示） ---------- */
+
+/** 表示中の内容を [区分, 値...] で返す */
+function readViewRows_(sheet) {
+  const f = VIEW_FIRST_ROW;
+  const v = sheet.getRange(f, 1, VIEW_ROWS, NOTES_COL + 1).getDisplayValues();
+  const checks = sheet.getRange(f, BLOCKED_COL + 5, VIEW_ROWS, 1).getValues();
+  const rows = [];
+  v.forEach(function(r) {
+    if (r[0] || r[1] || r[4]) rows.push(['lesson', r[0], r[1], r[2], r[4], r[5], r[6], r[7], r[8]]);
+  });
+  v.forEach(function(r, i) {
+    const d = normDate_(r[BLOCKED_COL - 1]);
+    if (d) rows.push(['blocked', d, r[BLOCKED_COL + 1], r[BLOCKED_COL + 2], r[BLOCKED_COL + 3], checks[i][0] === true ? 'TRUE' : 'FALSE']);
+  });
+  v.forEach(function(r) {
+    if (r[NOTES_COL - 1] || r[NOTES_COL]) rows.push(['note', r[NOTES_COL - 1], r[NOTES_COL]]);
+  });
+  return rows;
+}
+
+function writeView_(sheet, rows) {
+  const f = VIEW_FIRST_ROW;
+  const n = VIEW_ROWS;
+  const pick = function(kind) {
+    return rows.filter(function(r) { return r[0] === kind; }).map(function(r) { return r.slice(1); });
+  };
+  const cell = function(v, i) { return v[i] === undefined || v[i] === null ? '' : v[i]; };
+  const pad = function(list, width, fill) {
+    const out = list.slice(0, n);
+    while (out.length < n) out.push(new Array(width).fill(fill));
+    return out;
+  };
+
+  const lessons = pick('lesson');
+  sheet.getRange(f, 1, n, 3).setValues(pad(lessons.map(function(v) { return [cell(v, 0), cell(v, 1), cell(v, 2)]; }), 3, ''));
+  sheet.getRange(f, 5, n, 5).setValues(pad(lessons.map(function(v) {
+    return [cell(v, 3), cell(v, 4), cell(v, 5), cell(v, 6), colorLabel_(cell(v, 7))];
+  }), 5, ''));
+
+  const blocked = pick('blocked');
+  sheet.getRange(f, BLOCKED_COL, n, 1).setValues(pad(blocked.map(function(v) {
+    const d = normDate_(v[0]);
+    if (!d) return [''];
+    const p = d.split('-').map(Number);
+    return [new Date(p[0], p[1] - 1, p[2])];
+  }), 1, ''));
+  sheet.getRange(f, BLOCKED_COL + 2, n, 3).setValues(pad(blocked.map(function(v) { return [cell(v, 1), cell(v, 2), cell(v, 3)]; }), 3, ''));
+  sheet.getRange(f, BLOCKED_COL + 5, n, 1).setValues(pad(blocked.map(function(v) { return [String(v[4]).toUpperCase() === 'TRUE']; }), 1, false));
+
+  const notes = pick('note');
+  sheet.getRange(f, NOTES_COL, n, 2).setValues(pad(notes.map(function(v) { return [cell(v, 0), cell(v, 1)]; }), 2, ''));
+}
+
+function buildLessonView_(sheet) {
+  const f = VIEW_FIRST_ROW;
+  const n = VIEW_ROWS;
+  const last = f + n - 1;
+  if (sheet.getMaxRows() < last) sheet.insertRowsAfter(sheet.getMaxRows(), last - sheet.getMaxRows());
+  if (sheet.getMaxColumns() < NOTES_COL + 1) sheet.insertColumnsAfter(sheet.getMaxColumns(), NOTES_COL + 1 - sheet.getMaxColumns());
+
+  const all = sheet.getRange(1, 1, sheet.getMaxRows(), sheet.getMaxColumns());
+  all.breakApart();
+  all.clear();
+  all.clearDataValidations();
+  all.clearNote();
+  sheet.setConditionalFormatRules([]);
+  sheet.setFrozenRows(0);
+
+  sheet.getRange('A1').setNumberFormat('@').setFontSize(13).setFontWeight('bold')
+    .setBackground('#FFF2CC').setHorizontalAlignment('center').setVerticalAlignment('middle')
+    .setBorder(true, true, true, true, false, false, '#E0A800', SpreadsheetApp.BorderStyle.SOLID_MEDIUM)
+    .setNote('表示する月を選びます。\n切り替える前の月の内容は自動で保存されます。');
+  sheet.getRange('B1:I1').merge()
+    .setValue('◀ 月を選ぶと、その月のレッスン・予約不可日・概要に切り替わります（入力内容は自動保存）。' +
+      '翌月分は「前月をコピー → 月を切り替え → 貼り付け」か、メニュー「★データ更新 → 前月のレッスンをこの月にコピー」で作成できます。')
+    .setFontColor('#7F6000').setFontSize(10).setWrap(true).setVerticalAlignment('middle');
+  sheet.getRange(1, BLOCKED_COL, 1, BLOCKED_HEADERS.length).merge()
+    .setValue('予約不可 日程一覧（休館・貸切など WEB予約を止める日時）')
+    .setBackground('#C0392B').setFontColor('#ffffff').setFontWeight('bold').setVerticalAlignment('middle');
+  sheet.getRange(1, NOTES_COL, 1, 2).merge()
+    .setValue('概要・お知らせ（営業時間など）')
+    .setBackground('#008374').setFontColor('#ffffff').setFontWeight('bold').setVerticalAlignment('middle');
+  sheet.setRowHeight(1, 44);
+
+  sheet.getRange(2, 1, 1, LESSON_HEADERS.length).setValues([LESSON_HEADERS])
     .setFontWeight('bold').setBackground('#008374').setFontColor('#ffffff');
-  if (notes.length) {
-    sheet.getRange(2, NOTES_COL, notes.length, 2).setValues(notes).setWrap(true).setVerticalAlignment('top');
-  }
-  sheet.setColumnWidth(NOTES_COL, 160);
-  sheet.setColumnWidth(NOTES_COL + 1, 420);
-
-  const header = sheet.getRange(1, BLOCKED_COL, 1, BLOCKED_HEADERS.length);
-  header.setValues([BLOCKED_HEADERS]).setFontWeight('bold').setBackground('#C0392B').setFontColor('#ffffff');
-  sheet.getRange(1, BLOCKED_COL).setNote(
+  sheet.getRange(2, BLOCKED_COL, 1, BLOCKED_HEADERS.length).setValues([BLOCKED_HEADERS])
+    .setFontWeight('bold').setBackground('#E6B8B7');
+  sheet.getRange(2, BLOCKED_COL).setNote(
     '体験・休会中のご予約を受け付けない日時を入力します。\n' +
     '・開始/終了を空欄にすると、その日は終日予約不可\n' +
     '・開始/終了を入れると、その時間帯に始まるレッスンが予約不可\n' +
     '・LP掲載のチェックを外すと無効になります');
+  sheet.getRange(2, NOTES_COL, 1, 2).setValues([NOTE_HEADERS])
+    .setFontWeight('bold').setBackground('#B7DED8');
 
-  const dateRange = sheet.getRange(2, BLOCKED_COL, BLOCKED_MAX_ROWS, 1);
-  dateRange.setNumberFormat('yyyy/mm/dd')
+  sheet.getRange(f, 1, n, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(WEEKDAY_ORDER, true).setAllowInvalid(false).build());
+  sheet.getRange(f, 2, n, 2).setNumberFormat('@');
+  sheet.getRange(f, 4).setFormula('=ARRAYFORMULA(IF((B' + f + ':B' + last + '="")+(C' + f + ':C' + last + '=""),"",' +
+    'IFERROR(ROUND((TIMEVALUE(C' + f + ':C' + last + ')-TIMEVALUE(B' + f + ':B' + last + '))*1440),"")))');
+  sheet.getRange(f, 4, n, 1).setFontColor('#888888');
+  sheet.getRange(f, 7, n, 1).setNumberFormat('0');
+  sheet.getRange(f, 8, n, 1).setWrap(true);
+  const colorNames = Object.keys(COLOR_LABELS).map(function(k) { return COLOR_LABELS[k]; });
+  sheet.getRange(f, 9, n, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(colorNames, true).setAllowInvalid(true).build());
+  const nameRange = sheet.getRange(f, 5, n, 1);
+  sheet.setConditionalFormatRules(Object.keys(COLOR_LABELS).map(function(k) {
+    return SpreadsheetApp.newConditionalFormatRule()
+      .whenFormulaSatisfied('=$I' + f + '="' + COLOR_LABELS[k] + '"')
+      .setBackground(COLOR[k]).setFontColor(k === 'yellow' ? '#000000' : '#ffffff').setBold(true)
+      .setRanges([nameRange]).build();
+  }));
+
+  sheet.getRange(f, BLOCKED_COL, n, 1).setNumberFormat('yyyy/mm/dd')
     .setDataValidation(SpreadsheetApp.newDataValidation().requireDate().setAllowInvalid(false).build());
-  sheet.getRange(2, BLOCKED_COL + 1).setFormula(
-    '=ARRAYFORMULA(IF(L2:L="","",MID("日月火水木金土",WEEKDAY(L2:L),1)))');
-  sheet.getRange(2, BLOCKED_COL + 2, BLOCKED_MAX_ROWS, 2).setNumberFormat('@');
-  sheet.getRange(2, BLOCKED_COL + 5, BLOCKED_MAX_ROWS, 1).insertCheckboxes();
+  const L = String.fromCharCode(64 + BLOCKED_COL);
+  sheet.getRange(f, BLOCKED_COL + 1).setFormula(
+    '=ARRAYFORMULA(IF(' + L + f + ':' + L + last + '="","",MID("日月火水木金土",WEEKDAY(' + L + f + ':' + L + last + '),1)))');
+  sheet.getRange(f, BLOCKED_COL + 2, n, 2).setNumberFormat('@');
+  sheet.getRange(f, BLOCKED_COL + 5, n, 1).insertCheckboxes();
+  sheet.getRange(f, BLOCKED_COL, n, BLOCKED_HEADERS.length).setBackground('#FDF2F2');
 
-  const seedRows = BLOCKED_SEED.map(function(s) {
-    const p = s[0].split('-').map(Number);
-    return [new Date(p[0], p[1] - 1, p[2])];
-  });
-  sheet.getRange(2, BLOCKED_COL, BLOCKED_SEED.length, 1).setValues(seedRows);
-  sheet.getRange(2, BLOCKED_COL + 2, BLOCKED_SEED.length, 3)
-    .setValues(BLOCKED_SEED.map(function(s) { return [s[1], s[2], s[3]]; }));
-  sheet.getRange(2, BLOCKED_COL + 5, BLOCKED_SEED.length, 1)
-    .setValues(BLOCKED_SEED.map(function() { return [true]; }));
+  sheet.getRange(f, NOTES_COL, n, 2).setNumberFormat('@').setWrap(true).setVerticalAlignment('top');
 
-  sheet.getRange(2, BLOCKED_COL, BLOCKED_MAX_ROWS, BLOCKED_HEADERS.length).setBackground('#FDF2F2');
-  sheet.setColumnWidth(BLOCKED_COL, 110);
-  sheet.setColumnWidth(BLOCKED_COL + 1, 50);
-  sheet.setColumnWidth(BLOCKED_COL + 2, 70);
-  sheet.setColumnWidth(BLOCKED_COL + 3, 70);
-  sheet.setColumnWidth(BLOCKED_COL + 4, 260);
-  sheet.setColumnWidth(BLOCKED_COL + 5, 70);
+  sheet.setFrozenRows(2);
+  [100, 60, 60, 50, 260, 60, 50, 320, 80, 20, 20, 100, 40, 60, 60, 240, 60, 20, 150, 380]
+    .forEach(function(w, i) { sheet.setColumnWidth(i + 1, w); });
 }
 
-function readBlocked_(sheet) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2 || sheet.getRange(1, BLOCKED_COL).getValue() !== BLOCKED_HEADERS[0]) return [];
-  return sheet.getRange(2, BLOCKED_COL, lastRow - 1, BLOCKED_HEADERS.length).getValues()
-    .filter(function(r) { return r[0] instanceof Date && r[5] === true; })
+function refreshMonthValidation_(sheet, store) {
+  const cur = currentMonthKey_();
+  const months = readStore_(store).map(function(r) { return r[1]; });
+  for (let i = -1; i <= 3; i++) months.push(addMonths_(cur, i));
+  const uniq = months.filter(function(m, i) { return /^\d{4}-\d{2}$/.test(m) && months.indexOf(m) === i; }).sort();
+  sheet.getRange('A1').setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(uniq.map(monthLabel_), true).setAllowInvalid(false).build());
+}
+
+function loadMonthIntoView_(sheet, store, month) {
+  writeView_(sheet, storeRowsOf_(store, month));
+  setLoadedMonth_(store, month);
+  refreshMonthValidation_(sheet, store);
+  sheet.getRange('A1').setValue(monthLabel_(month));
+}
+
+/* ---------- 初期化・移行 ---------- */
+
+function isLessonViewReady_(ss) {
+  const sheet = ss.getSheetByName(LESSON_SHEET_NAME);
+  const store = ss.getSheetByName(STORE_SHEET_NAME);
+  return !!(sheet && store && getLoadedMonth_(store) && sheet.getRange(2, 1).getValue() === LESSON_HEADERS[0]);
+}
+
+function ensureLessonSheetLayout_(ss) {
+  if (isLessonViewReady_(ss)) return;
+  withDocumentLock_(function() {
+    if (isLessonViewReady_(ss)) return;
+    const sheet = ss.getSheetByName(LESSON_SHEET_NAME) || ss.insertSheet(LESSON_SHEET_NAME);
+    const store = getStoreSheet_(ss);
+    if (sheet.getRange(1, 1).getValue() === '対象月') migrateOldLayout_(sheet, store);
+    else if (!readStore_(store).length) seedStore_(store);
+    buildLessonView_(sheet);
+    loadMonthIntoView_(sheet, store, currentMonthKey_());
+    SpreadsheetApp.flush();
+  });
+}
+
+function seedStore_(store) {
+  const rows = LESSONS.map(function(l) { return ['lesson', l[0], l[1], l[2], l[3], l[4], l[5], l[6], colorLabel_(l[7])]; })
+    .concat(BLOCKED_SEED.map(function(b) { return ['blocked', b[0], b[1], b[2], b[3], 'TRUE']; }))
+    .concat(MONTH_NOTES.filter(function(n) { return n[0] !== '対象月'; }).map(function(n) { return ['note', n[0], n[1]]; }));
+  writeStoreMonth_(store, LESSON_MONTH, rows);
+}
+
+/** 旧レイアウト（1行目見出し・A列 対象月）から月別データへ移行 */
+function migrateOldLayout_(sheet, store) {
+  const last = sheet.getLastRow();
+  if (last < 2) return;
+  const v = sheet.getRange(2, 1, last - 1, NOTES_COL + 1).getDisplayValues();
+  const checks = sheet.getRange(2, BLOCKED_COL + 5, last - 1, 1).getValues();
+  const hasBlocked = sheet.getRange(1, BLOCKED_COL).getValue() === '予約不可 日付';
+  const hasNotes = sheet.getRange(1, NOTES_COL).getValue() === '項目';
+  const byMonth = {};
+  const push = function(m, row) { (byMonth[m] = byMonth[m] || []).push(row); };
+  const lessonMonths = [];
+  const notes = [];
+
+  v.forEach(function(r, i) {
+    if (r[1] && r[5]) {
+      const m = monthKey_(r[0]) || LESSON_MONTH;
+      push(m, ['lesson', r[1], r[2], r[3], r[5], r[6], r[7], r[8], colorLabel_(r[9])]);
+      if (lessonMonths.indexOf(m) === -1) lessonMonths.push(m);
+    }
+    const d = hasBlocked ? normDate_(r[BLOCKED_COL - 1]) : '';
+    if (d) push(d.slice(0, 7), ['blocked', d, r[BLOCKED_COL + 1], r[BLOCKED_COL + 2], r[BLOCKED_COL + 3], checks[i][0] === true ? 'TRUE' : 'FALSE']);
+    if (hasNotes && r[NOTES_COL - 1] !== '対象月' && (r[NOTES_COL - 1] || r[NOTES_COL])) notes.push(['note', r[NOTES_COL - 1], r[NOTES_COL]]);
+  });
+  (lessonMonths.length ? lessonMonths : [LESSON_MONTH]).forEach(function(m) {
+    notes.forEach(function(n) { push(m, n); });
+  });
+  Object.keys(byMonth).forEach(function(m) { writeStoreMonth_(store, m, byMonth[m]); });
+}
+
+/* ---------- 月の切り替え・コピー ---------- */
+
+/** onEdit から呼ばれる（シンプルトリガー） */
+function handleLessonSheetEdit_(e) {
+  const r = e.range;
+  if (r.getRow() !== 1 || r.getColumn() !== 1) return;
+  switchLessonMonth_(e.source, r.getSheet().getRange('A1').getDisplayValue());
+}
+
+function switchLessonMonth_(ss, label) {
+  withDocumentLock_(function() {
+    const sheet = ss.getSheetByName(LESSON_SHEET_NAME);
+    const store = getStoreSheet_(ss);
+    const loaded = getLoadedMonth_(store);
+    const next = monthKey_(label);
+    if (!next) {
+      if (loaded) sheet.getRange('A1').setValue(monthLabel_(loaded));
+      return;
+    }
+    if (next === loaded) return;
+    if (loaded) writeStoreMonth_(store, loaded, readViewRows_(sheet));
+    loadMonthIntoView_(sheet, store, next);
+    SpreadsheetApp.flush();
+  });
+}
+
+/** メニュー：前月のレッスン・概要を表示中の月にコピー（予約不可日はコピーしない） */
+function copyPreviousMonthLessons() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ui = SpreadsheetApp.getUi();
+  ensureLessonSheetLayout_(ss);
+  const sheet = ss.getSheetByName(LESSON_SHEET_NAME);
+  const store = getStoreSheet_(ss);
+  const loaded = getLoadedMonth_(store);
+  const prev = addMonths_(loaded, -1);
+  const prevRows = storeRowsOf_(store, prev).filter(function(r) { return r[0] !== 'blocked'; });
+  if (!prevRows.length) {
+    ui.alert(monthLabel_(prev) + 'のデータがありません。');
+    return;
+  }
+  const current = readViewRows_(sheet);
+  if (current.some(function(r) { return r[0] === 'lesson'; })) {
+    const ok = ui.alert(monthLabel_(loaded) + 'のレッスンを、' + monthLabel_(prev) + 'の内容で上書きします。よろしいですか？',
+      ui.ButtonSet.YES_NO);
+    if (ok !== ui.Button.YES) return;
+  }
+  withDocumentLock_(function() {
+    writeView_(sheet, prevRows.concat(current.filter(function(r) { return r[0] === 'blocked'; })));
+    writeStoreMonth_(store, loaded, readViewRows_(sheet));
+  });
+  sheet.activate();
+  ui.alert(monthLabel_(prev) + 'の内容をコピーしました。変更があるレッスンだけ修正してください。');
+}
+
+/* ---------- LP向け読み取り ---------- */
+
+/** 全月の [区分, 月, 値...]（表示中の月はレッスン一覧の内容を使う） */
+function collectMonthRows_(ss) {
+  const sheet = ss.getSheetByName(LESSON_SHEET_NAME);
+  const store = ss.getSheetByName(STORE_SHEET_NAME);
+  if (!sheet || !store) return [];
+  return withDocumentLock_(function() {
+    const loaded = getLoadedMonth_(store);
+    const rows = readStore_(store).filter(function(r) { return r[1] !== loaded; });
+    if (loaded) {
+      readViewRows_(sheet).forEach(function(r) { rows.push([r[0], loaded].concat(r.slice(1))); });
+    }
+    return rows;
+  });
+}
+
+function lessonsFrom_(rows) {
+  return rows
+    .filter(function(r) { return r[0] === 'lesson' && r[2] && normTime_(r[3]) && r[5]; })
     .map(function(r) {
+      const start = normTime_(r[3]);
+      const end = normTime_(r[4]);
       return {
-        date: Utilities.formatDate(r[0], 'Asia/Tokyo', 'yyyy-MM-dd'),
-        start: cellToTime_(r[2]),
-        end: cellToTime_(r[3]),
-        message: String(r[4] || '').trim()
+        month: r[1],
+        day: String(r[2]).trim(),
+        start: start,
+        end: end,
+        minutes: end ? toMin_(end) - toMin_(start) : '',
+        name: String(r[5]).trim(),
+        intensity: String(r[6] || ''),
+        capacity: r[7] === '' || r[7] === undefined ? '' : Number(r[7]) || String(r[7]),
+        note: String(r[8] || ''),
+        color: colorKey_(r[9])
       };
     });
+}
+
+function blockedFrom_(rows) {
+  return rows
+    .filter(function(r) { return r[0] === 'blocked' && normDate_(r[2]) && String(r[6]).toUpperCase() === 'TRUE'; })
+    .map(function(r) {
+      return { date: normDate_(r[2]), start: normTime_(r[3]), end: normTime_(r[4]), message: String(r[5] || '').trim() };
+    });
+}
+
+function notesFrom_(rows) {
+  return rows
+    .filter(function(r) { return r[0] === 'note' && r[2] && r[3]; })
+    .map(function(r) { return { month: r[1], label: String(r[2]), value: String(r[3]) }; });
 }
 
 function toMin_(t) {
@@ -235,17 +550,28 @@ function toMin_(t) {
 }
 
 function isSlotBlocked_(ss, slot) {
-  const sheet = ss.getSheetByName(LESSON_SHEET_NAME);
-  if (!sheet) return false;
   const date = slot.slice(0, 10);
   const start = toMin_(slot.slice(11));
-  return readBlocked_(sheet).some(function(b) {
+  return blockedFrom_(collectMonthRows_(ss)).some(function(b) {
     if (b.date !== date) return false;
     if (!b.start) return true;
     const s = toMin_(b.start);
     const e = b.end ? toMin_(b.end) : 24 * 60;
     return start >= s && start < e;
   });
+}
+
+/** 予約できる最終日（今日から翌月の同日の前日まで。例：10/6 → 11/5） */
+function bookingLimit_(today) {
+  const p = today.split('-').map(Number);
+  const daysInNext = new Date(p[0], p[1] + 1, 0).getDate();
+  return Utilities.formatDate(new Date(p[0], p[1], Math.min(p[2], daysInNext) - 1), 'Asia/Tokyo', 'yyyy-MM-dd');
+}
+
+function isSlotInWindow_(slot) {
+  const today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
+  const date = slot.slice(0, 10);
+  return date >= today && date <= bookingLimit_(today);
 }
 
 /* ===============================================================
@@ -259,8 +585,7 @@ const CHANGE_MAX_ROWS = 500;
 
 function setupChangeSheetIfMissing() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const lessonSheet = ss.getSheetByName(LESSON_SHEET_NAME);
-  if (lessonSheet && lessonSheet.getLastRow() >= 2) ensureLessonSheetLayout_(lessonSheet);
+  ensureLessonSheetLayout_(ss);
   if (!ss.getSheetByName(CHANGE_SHEET_NAME)) {
     setupChangeSheet_(ss, true);
   }
@@ -318,10 +643,9 @@ function setupChangeSheet_(ss, seed) {
 
 function refreshChangeTargetValidation_(ss) {
   const changeSheet = ss.getSheetByName(CHANGE_SHEET_NAME);
-  const lessonSheet = ss.getSheetByName(LESSON_SHEET_NAME);
-  if (!changeSheet || !lessonSheet || lessonSheet.getLastRow() < 2) return;
+  if (!changeSheet) return;
 
-  const labels = readLessons_(lessonSheet).map(lessonLabel_);
+  const labels = lessonsFrom_(collectMonthRows_(ss)).map(lessonLabel_);
   const unique = labels.filter(function(v, i) { return labels.indexOf(v) === i; });
   if (unique.length === 0) return;
   changeSheet.getRange(2, 4, CHANGE_MAX_ROWS, 1).setDataValidation(
@@ -334,29 +658,7 @@ function lessonLabel_(l) {
 
 function cellToTime_(v) {
   if (v instanceof Date) return Utilities.formatDate(v, 'Asia/Tokyo', 'H:mm');
-  return String(v || '').trim().replace('：', ':');
-}
-
-function readLessons_(sheet) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return [];
-  return sheet.getRange(2, 1, lastRow - 1, 10).getValues()
-    .filter(function(r) { return r[1] && r[2] && r[5]; })
-    .map(function(r) {
-      const month = r[0] instanceof Date ? Utilities.formatDate(r[0], 'Asia/Tokyo', 'yyyy-MM') : String(r[0]).trim();
-      return {
-        month: month,
-        day: String(r[1]).trim(),
-        start: cellToTime_(r[2]),
-        end: cellToTime_(r[3]),
-        minutes: Number(r[4]) || '',
-        name: String(r[5]).trim(),
-        intensity: String(r[6] || ''),
-        capacity: r[7] === '' ? '' : Number(r[7]) || String(r[7]),
-        note: String(r[8] || ''),
-        color: String(r[9] || '')
-      };
-    });
+  return normTime_(v) || String(v || '').trim();
 }
 
 function readChanges_(sheet) {
@@ -378,15 +680,6 @@ function readChanges_(sheet) {
         message: String(r[7] || '').trim()
       };
     });
-}
-
-function readNotes_(sheet) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return [];
-  if (sheet.getRange(1, NOTES_COL).getValue() !== '項目') return [];
-  return sheet.getRange(2, NOTES_COL, lastRow - 1, 2).getValues()
-    .filter(function(r) { return r[0] && r[1]; })
-    .map(function(r) { return { label: String(r[0]), value: String(r[1]) }; });
 }
 
 /* ===============================================================
@@ -433,14 +726,12 @@ function countBookings_(ss, fromDate) {
 }
 
 function findCapacity_(ss, slot) {
-  const lessonSheet = ss.getSheetByName(LESSON_SHEET_NAME);
-  if (!lessonSheet) return null;
   const date = slot.slice(0, 10);
-  const start = slot.slice(11);
+  const start = normTime_(slot.slice(11));
   const d = new Date(date + 'T00:00:00+09:00');
   const day = WEEKDAY_CHARS[Number(Utilities.formatDate(d, 'Asia/Tokyo', 'u')) % 7];
   const month = date.slice(0, 7);
-  const lesson = readLessons_(lessonSheet).filter(function(l) {
+  const lesson = lessonsFrom_(collectMonthRows_(ss)).filter(function(l) {
     return l.month === month && l.day === day && l.start === start;
   })[0];
   return lesson && typeof lesson.capacity === 'number' ? lesson.capacity : null;
@@ -458,16 +749,17 @@ function isSlotFull_(ss, slot) {
  */
 function getLessonData() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const lessonSheet = ss.getSheetByName(LESSON_SHEET_NAME);
   const changeSheet = ss.getSheetByName(CHANGE_SHEET_NAME);
   const today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
-  if (lessonSheet) ensureLessonSheetLayout_(lessonSheet);
+  ensureLessonSheetLayout_(ss);
+  const rows = collectMonthRows_(ss);
   return {
     result: 'success',
     today: today,
-    lessons: lessonSheet ? readLessons_(lessonSheet) : [],
-    notes: lessonSheet ? readNotes_(lessonSheet) : [],
-    blocked: lessonSheet ? readBlocked_(lessonSheet).filter(function(b) { return b.date >= today; }) : [],
+    bookingUntil: bookingLimit_(today),
+    lessons: lessonsFrom_(rows),
+    notes: notesFrom_(rows),
+    blocked: blockedFrom_(rows).filter(function(b) { return b.date >= today; }),
     changes: changeSheet ? readChanges_(changeSheet).filter(function(c) { return c.date >= today; }) : [],
     bookings: countBookings_(ss, today)
   };

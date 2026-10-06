@@ -25,7 +25,14 @@ https://script.google.com/macros/s/AKfycbxpNqcHdCq9uWHWsPminPZPXxgMkY3JbPw5WK3nK
 - ページ: `/v2/`（https://yogahibarigaoka-page.vercel.app/v2/）
 - Web アプリ: デプロイ `AKfycbw_bG0_...`（@22 以降、v2 専用）。本番 `/`（@21）とは別デプロイ
 - `doGet?action=lessons` で「レッスン一覧」「休講・変更」と予約数を返す
-- 体験・休会中予約は `lesson_slot`（`yyyy-MM-dd H:mm`）付きで送信し、定員超過は doPost で拒否
+- 体験・休会中予約は `lesson_slot`（`yyyy-MM-dd H:mm`）付きで送信し、定員超過・予約不可・受付期間外（今日〜翌月同日の前日）は doPost で拒否
+
+## レッスン一覧（月切り替え式）
+
+- A1 のプルダウンで表示月を切り替える（`onEdit` → `switchLessonMonth_`）。切り替え前の内容は非表示シート「月別データ（編集不要）」に保存
+- A〜I列: レッスン／L〜Q列: 予約不可日程（開始・終了が空欄なら終日）／S〜T列: 概要（営業時間など）
+- LP は「月別データ」の全月＋表示中の月（レッスン一覧の内容）を読む
+- メニュー「★データ更新 → 前月のレッスンをこの月にコピー」で前月のレッスン・概要を複製（予約不可日はコピーしない）
 
 ## formType 対応表（index.html ↔ GAS）
 

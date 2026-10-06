@@ -38,11 +38,10 @@ function onOpen() {
   // メニュー名「★データ更新」を追加
   ui.createMenu('★データ更新')
     .addItem('全シートのデザイン・設定を最新にする', 'applyStyleToAllSheets')
-    .addItem('レッスン一覧を書き込む', 'importLessonList')
+    .addItem('前月のレッスンをこの月にコピー', 'copyPreviousMonthLessons')
     .addToUi();
 
   try {
-    importLessonListIfEmpty();
     setupChangeSheetIfMissing();
   } catch (e) {
     console.error('レッスン一覧の自動書き込みに失敗: ' + e.toString());
@@ -136,6 +135,10 @@ function doPost(e) {
       lock = LockService.getScriptLock();
       lock.waitLock(20000);
       ensureHeader_(sheet, 'lesson_slot');
+      if (!isSlotInWindow_(params.lesson_slot)) {
+        lock.releaseLock();
+        throw new Error('選択された日時は予約受付期間外です。');
+      }
       if (isSlotBlocked_(spreadsheet, params.lesson_slot)) {
         lock.releaseLock();
         throw new Error('選択された日時はご予約いただけません。別のレッスンをお選びください。');
@@ -201,6 +204,10 @@ function doPost(e) {
  * スプレッドシートの「台帳記入」列が編集されたときに自動実行されます
  */
 function onEdit(e) {
+  if (e.range.getSheet().getName() === LESSON_SHEET_NAME) {
+    handleLessonSheetEdit_(e);
+    return;
+  }
   const sheet = e.source.getActiveSheet();
   const range = e.range;
   const colIndex = range.getColumn();
