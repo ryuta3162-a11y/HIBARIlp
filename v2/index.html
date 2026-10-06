@@ -133,9 +133,13 @@
 
                 <!-- レッスン予約（スプレッドシート「レッスン一覧」「休講・変更」から取得） -->
                 <section id="lesson-schedule" class="text-left">
-                    <div id="lesson-changes" class="hidden mb-5 p-4 bg-red-50 border border-red-200 rounded-xl">
-                        <p class="font-bold text-red-700 text-sm mb-2">休講・変更のお知らせ</p>
-                        <ul id="lesson-changes-list" class="text-sm text-red-700 space-y-1"></ul>
+                    <div class="mb-5 flex items-center gap-4 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                        <span class="shrink-0 text-xs font-bold text-white bg-brand-teal px-2 py-1 rounded">レッスン強度</span>
+                        <ul class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-700">
+                            <li><span class="text-amber-500">★</span> 初級</li>
+                            <li><span class="text-amber-500">★★</span> 中級</li>
+                            <li><span class="text-amber-500">★★★</span> 上級</li>
+                        </ul>
                     </div>
                     <div class="date-bar sticky top-0 z-30 bg-white -mx-5 sm:-mx-8 px-5 sm:px-8 pt-2 pb-3 border-b">
                         <p id="lesson-month-label" class="text-sm font-bold text-gray-700 mb-2"></p>
@@ -146,11 +150,6 @@
                         <div class="skeleton h-20 rounded-xl"></div>
                         <div class="skeleton h-20 rounded-xl"></div>
                         <div class="skeleton h-20 rounded-xl"></div>
-                    </div>
-                    <div class="mt-6 p-4 bg-gray-50 rounded-xl text-xs text-gray-600 space-y-1">
-                        <p><span class="text-amber-500">★</span>初級　<span class="text-amber-500">★★</span>中級　<span class="text-amber-500">★★★</span>上級</p>
-                        <p>溶岩浴：インストラクター不在の溶岩スタジオ内で、ゆっくりとお休みいただくお時間です。</p>
-                        <p>※レッスン開始20分前〜5分前にご来館ください。内容は変更になる場合がございます。</p>
                     </div>
                 </section>
 
@@ -688,10 +687,6 @@
             const webAppUrl = 'https://script.google.com/macros/s/AKfycbw_bG0_59Cs7VEQRUhao7PvtQpf5QcB2hn_2Fsctuq6r2Rzr_domOwRAkpBeSWPRpSOBg/exec';
 
             // ===== レッスン予約 =====
-            const LESSON_COLORS = {
-                orange: '#ED7D31', blue: '#1F9BB8', magenta: '#E61EDC',
-                green: '#00B050', gray: '#A6A6A6', yellow: '#FFD966'
-            };
             const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
             const SCHEDULE_DAYS = 14;
             const TRIAL_MODE = /^\/hibarigaoka-studio\/?$/.test(location.pathname) || new URLSearchParams(location.search).get('form') === 'trial';
@@ -716,18 +711,6 @@
                 const d = new Date(dateStr + 'T00:00:00');
                 return `${d.getMonth() + 1}/${d.getDate()}(${WEEKDAYS[d.getDay()]})`;
             }
-            function changeText(c) {
-                const target = c.target ? `${c.target.start}〜 ${c.target.name}` : '';
-                switch (c.type) {
-                    case '休講': return `${target} 休講`;
-                    case '時間変更': return `${target} → ${c.newStart}〜${c.newEnd} に時間変更`;
-                    case 'レッスン変更': return `${target} → ${c.newName} に変更`;
-                    case '代行': return `${target} 代行`;
-                    case '追加': return `${c.newStart}〜${c.newEnd} ${c.newName} を追加`;
-                    case '休館日': return '休館日';
-                    default: return '';
-                }
-            }
             function nowMinutes() {
                 const n = new Date();
                 return n.getHours() * 60 + n.getMinutes();
@@ -747,7 +730,7 @@
 
                 changes.forEach(c => {
                     if (c.type === '追加') {
-                        items.push({ start: c.newStart, end: c.newEnd, name: c.newName, intensity: '', capacity: '', color: 'blue', status: '追加', message: c.message });
+                        items.push({ start: c.newStart, end: c.newEnd, name: c.newName, intensity: '', capacity: '', status: '追加', message: c.message });
                         return;
                     }
                     if (!c.target) return;
@@ -767,7 +750,6 @@
                 items.forEach(i => {
                     i.date = dateStr;
                     i.slot = `${dateStr} ${i.start}`;
-                    i.isPersonal = i.name.includes('パーソナル');
                     const booked = (data.bookings && data.bookings[i.slot]) || 0;
                     i.remaining = typeof i.capacity === 'number' ? Math.max(i.capacity - booked, 0) : null;
                     i.past = isToday && timeKey(i.start) <= nowMinutes();
@@ -777,8 +759,7 @@
                     });
                     i.blocked = !!block;
                     if (block && block.message && !i.message) i.message = block.message;
-                    i.membersOnly = TRIAL_MODE && i.isPersonal;
-                    i.bookable = !closed && i.status !== '休講' && !i.past && !i.blocked && !i.membersOnly && i.remaining !== 0;
+                    i.bookable = !closed && i.status !== '休講' && !i.past && !i.blocked && i.remaining !== 0;
                 });
                 return { day, closed, dayBlock, notices, items, hasMonth: data.lessons.some(l => l.month === month) };
             }
@@ -800,7 +781,6 @@
                     }
                     html += info.items.map((i, idx) => {
                         const cancelled = i.status === '休講';
-                        const color = cancelled ? '#d1d5db' : (LESSON_COLORS[i.color] || '#008374');
                         const badge = i.status ? `<span class="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full ${cancelled ? 'bg-red-600 text-white' : 'bg-amber-100 text-amber-800'}">${esc(i.status)}</span>` : '';
                         const minutes = timeKey(i.end) - timeKey(i.start);
                         const tags = [
@@ -812,16 +792,15 @@
                         if (cancelled) action = '<span class="state-pill bg-gray-100 text-gray-500">休講</span>';
                         else if (i.past) action = '<span class="state-pill bg-gray-100 text-gray-400">受付終了</span>';
                         else if (i.blocked) action = '<span class="state-pill bg-gray-100 text-gray-500">予約不可</span>';
-                        else if (i.membersOnly) action = '<span class="state-pill bg-gray-100 text-gray-500">会員様専用</span>';
                         else if (i.remaining === 0) action = '<span class="state-pill bg-red-50 text-red-600">満席</span>';
                         else action = '<span class="state-pill bg-brand-teal text-white shadow-sm">予約</span>';
                         return `
                             <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-center gap-3 rounded-xl border bg-white p-3 transition ${i.bookable ? 'hover:shadow-md hover:border-teal-400 active:scale-[0.99]' : 'bg-gray-50 cursor-not-allowed'}">
                                 <div class="w-14 shrink-0 text-center ${i.bookable ? '' : 'opacity-50'}">
-                                    <p class="text-lg font-bold leading-tight ${cancelled ? 'line-through' : ''}" style="color:${i.bookable ? color : '#6b7280'}">${esc(i.start)}</p>
+                                    <p class="text-lg font-bold leading-tight ${cancelled ? 'line-through' : ''} ${i.bookable ? 'brand-teal' : 'text-gray-500'}">${esc(i.start)}</p>
                                     <p class="text-[11px] text-gray-400">〜${esc(i.end)}</p>
                                 </div>
-                                <div class="w-1 self-stretch rounded-full shrink-0" style="background:${color}"></div>
+                                <div class="w-px self-stretch bg-gray-200 shrink-0"></div>
                                 <div class="flex-1 min-w-0 ${i.bookable ? '' : 'opacity-60'}">
                                     <p class="font-bold leading-snug ${cancelled ? 'line-through text-gray-500' : 'text-gray-800'}">${esc(i.name)}</p>
                                     <div class="flex flex-wrap items-center gap-1 mt-1">${i.intensity ? `<span class="text-amber-500 text-sm mr-1">${esc(i.intensity)}</span>` : ''}${tags}</div>
@@ -851,10 +830,6 @@
             }
 
             function openBookingSheet(lesson) {
-                if (lesson.isPersonal) {
-                    showForm('form-pilates');
-                    return;
-                }
                 selectedLesson = lesson;
                 const daysAhead = daysBetween(scheduleData.today, lesson.date);
                 const isPilates = lesson.name.includes('ピラティス');
@@ -954,14 +929,6 @@
                     if (btn) select(btn.dataset.date);
                 };
                 select(selectedDate);
-
-                const notices = data.changes
-                    .filter(c => c.type !== 'お知らせ')
-                    .sort((a, b) => a.date.localeCompare(b.date) || timeKey(a.target && a.target.start) - timeKey(b.target && b.target.start));
-                document.getElementById('lesson-changes-list').innerHTML = notices.map(c =>
-                    `<li><span class="font-bold">${mdLabel(c.date)}</span> ${esc(changeText(c))}${c.message && c.type !== '休館日' ? `（${esc(c.message)}）` : ''}</li>`
-                ).join('');
-                document.getElementById('lesson-changes').classList.toggle('hidden', notices.length === 0);
             }
 
             function loadSchedule() {

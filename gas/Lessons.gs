@@ -6,72 +6,62 @@
 const LESSON_SHEET_NAME = 'レッスン一覧';
 const LESSON_MONTH = '2026-10';
 
-const COLOR = {
-  orange: '#ED7D31',
-  blue: '#1F9BB8',
-  magenta: '#E61EDC',
-  green: '#00B050',
-  gray: '#A6A6A6',
-  yellow: '#FFD966'
-};
-
 const PILATES_NOTE = '※リフォーマー会員様のみご参加可能／滑り止め靴下必須';
 const LAVA_NOTE = '※温度湿度が低い場合がございます。';
 
-// [曜日, 開始, 終了, レッスン名, 強度, 定員, 備考, 色]
+// [曜日, 開始, 終了, レッスン名, 強度, 定員, 備考]
 const LESSONS = [
-  ['月', '10:00', '10:45', 'フローヨガ', '★★', '', '', 'orange'],
-  ['月', '11:15', '12:00', 'アシュタンガヨガ', '★★★', '', '', 'magenta'],
-  ['月', '12:30', '13:15', 'ゆるふわデトックスヨガ', '★', '', '※26日ご予約済パーソナル', 'blue'],
-  ['月', '15:00', '16:00', 'マシンピラティス トータルボディメイク', '★', 6, PILATES_NOTE, 'green'],
-  ['月', '16:30', '17:30', 'パーソナル（要予約・有料）', '', 1, '1週間前までに予約フォームにてご予約下さい。' + PILATES_NOTE, 'yellow'],
-  ['月', '18:45', '19:45', 'マシンピラティス 姿勢美人', '★★', 6, PILATES_NOTE + '／※5日ご予約済パーソナル', 'green'],
-  ['月', '20:15', '21:15', 'マシンピラティス 桃尻メイク', '★★★', 6, PILATES_NOTE, 'green'],
+  ['月', '10:00', '10:45', 'フローヨガ', '★★', '', ''],
+  ['月', '11:15', '12:00', 'アシュタンガヨガ', '★★★', '', ''],
+  ['月', '12:30', '13:15', 'ゆるふわデトックスヨガ', '★', '', '※26日ご予約済パーソナル'],
+  ['月', '15:00', '16:00', 'マシンピラティス トータルボディメイク', '★', 6, PILATES_NOTE],
+  ['月', '18:45', '19:45', 'マシンピラティス 姿勢美人', '★★', 6, PILATES_NOTE + '／※5日ご予約済パーソナル'],
+  ['月', '20:15', '21:15', 'マシンピラティス 桃尻メイク', '★★★', 6, PILATES_NOTE],
 
-  ['火', '10:00', '11:00', 'マシンピラティス お腹引き締め', '★★★', 6, PILATES_NOTE, 'green'],
-  ['火', '11:30', '12:30', 'マシンピラティス ベーシック', '★★', 6, PILATES_NOTE, 'green'],
-  ['火', '13:30', '14:15', '溶岩浴', '', '', LAVA_NOTE + '／27日プロジェクターレッスン', 'gray'],
-  ['火', '14:45', '15:30', '整えるヨガ', '★★', '', LAVA_NOTE, 'orange'],
-  ['火', '16:00', '16:45', 'ホイールで体幹アップヨガ', '★★★', 11, LAVA_NOTE, 'magenta'],
-  ['火', '19:15', '20:00', 'リンパヨガ', '★', '', '', 'blue'],
-  ['火', '20:30', '21:15', '骨盤コンディショニング', '★★', '', '', 'orange'],
+  ['火', '10:00', '11:00', 'マシンピラティス お腹引き締め', '★★★', 6, PILATES_NOTE],
+  ['火', '11:30', '12:30', 'マシンピラティス ベーシック', '★★', 6, PILATES_NOTE],
+  ['火', '13:30', '14:15', '溶岩浴', '', '', LAVA_NOTE + '／27日プロジェクターレッスン'],
+  ['火', '14:45', '15:30', '整えるヨガ', '★★', '', LAVA_NOTE],
+  ['火', '16:00', '16:45', 'ホイールで体幹アップヨガ', '★★★', 11, LAVA_NOTE],
+  ['火', '19:15', '20:00', 'リンパヨガ', '★', '', ''],
+  ['火', '20:30', '21:15', '骨盤コンディショニング', '★★', '', ''],
 
-  ['水', '10:00', '10:45', '股関節を緩めるヨガ', '★', '', '', 'blue'],
-  ['水', '11:15', '12:00', '骨盤調整ヨガ', '★★', '', '', 'orange'],
-  ['水', '12:45', '13:30', '溶岩浴', '', '', '', 'gray'],
-  ['水', '14:00', '14:45', 'ウェルエイジングヨガ', '★★', '', '', 'orange'],
-  ['水', '15:15', '16:15', '眠活ヨガ', '★', '', '7日プロジェクターレッスン', 'blue'],
-  ['水', '16:45', '17:30', '溶岩浴', '', '', '', 'gray'],
-  ['水', '19:15', '20:00', 'からだ調整ヨガ', '★★', '', '', 'orange'],
-  ['水', '20:30', '21:15', 'リラックスヨガ', '★', '', '', 'blue'],
+  ['水', '10:00', '10:45', '股関節を緩めるヨガ', '★', '', ''],
+  ['水', '11:15', '12:00', '骨盤調整ヨガ', '★★', '', ''],
+  ['水', '12:45', '13:30', '溶岩浴', '', '', ''],
+  ['水', '14:00', '14:45', 'ウェルエイジングヨガ', '★★', '', ''],
+  ['水', '15:15', '16:15', '眠活ヨガ', '★', '', '7日プロジェクターレッスン'],
+  ['水', '16:45', '17:30', '溶岩浴', '', '', ''],
+  ['水', '19:15', '20:00', 'からだ調整ヨガ', '★★', '', ''],
+  ['水', '20:30', '21:15', 'リラックスヨガ', '★', '', ''],
 
-  ['木', '10:00', '10:45', '猫背&ネックリリースヨガ', '★', '', '※15日はイベントレッスン（要確認）', 'blue'],
-  ['木', '11:15', '12:15', '腰すっきりヨガ', '★★', '', '', 'orange'],
-  ['木', '12:45', '13:30', '美脚・美尻ヨガ', '★★', '', '', 'orange'],
-  ['木', '14:00', '14:45', 'からだほぐしヨガ', '★', '', '', 'blue'],
-  ['木', '15:15', '16:00', '胸郭解放ヨガ', '★★', 8, '', 'orange'],
-  ['木', '18:00', '18:45', '溶岩浴', '', '', '', 'gray'],
-  ['木', '19:15', '20:00', 'ビギナーヨガ', '★', '', '', 'blue'],
-  ['木', '20:30', '21:15', 'ヴィンヤサフロー', '★★★', '', '', 'magenta'],
+  ['木', '10:00', '10:45', '猫背&ネックリリースヨガ', '★', '', '※15日はイベントレッスン（要確認）'],
+  ['木', '11:15', '12:15', '腰すっきりヨガ', '★★', '', ''],
+  ['木', '12:45', '13:30', '美脚・美尻ヨガ', '★★', '', ''],
+  ['木', '14:00', '14:45', 'からだほぐしヨガ', '★', '', ''],
+  ['木', '15:15', '16:00', '胸郭解放ヨガ', '★★', 8, ''],
+  ['木', '18:00', '18:45', '溶岩浴', '', '', ''],
+  ['木', '19:15', '20:00', 'ビギナーヨガ', '★', '', ''],
+  ['木', '20:30', '21:15', 'ヴィンヤサフロー', '★★★', '', ''],
 
-  ['金', '15:30', '16:30', 'マシンピラティス 魅せるバック&アームズ Ver.2', '★★', 6, PILATES_NOTE + '／※2日ご予約済パーソナル', 'green'],
-  ['金', '17:00', '18:00', 'マシンピラティス チェストオープン', '★★', 6, PILATES_NOTE, 'green'],
-  ['金', '18:30', '19:30', 'マシンピラティス トータルボディメイク', '★', 6, PILATES_NOTE, 'green'],
-  ['金', '20:00', '21:00', 'マシンピラティス お腹引き締め', '★★★', 6, PILATES_NOTE, 'green'],
+  ['金', '15:30', '16:30', 'マシンピラティス 魅せるバック&アームズ Ver.2', '★★', 6, PILATES_NOTE + '／※2日ご予約済パーソナル'],
+  ['金', '17:00', '18:00', 'マシンピラティス チェストオープン', '★★', 6, PILATES_NOTE],
+  ['金', '18:30', '19:30', 'マシンピラティス トータルボディメイク', '★', 6, PILATES_NOTE],
+  ['金', '20:00', '21:00', 'マシンピラティス お腹引き締め', '★★★', 6, PILATES_NOTE],
 
-  ['土', '9:30', '10:15', 'からだ調整ヨガ', '★★', '', '', 'orange'],
-  ['土', '10:45', '11:30', 'リフレッシュヨガ', '★', '', '', 'blue'],
-  ['土', '12:15', '13:00', 'フローヨガ', '★★', '', '', 'orange'],
-  ['土', '13:30', '14:15', 'ベーシックヨガ', '★', '', '', 'blue'],
-  ['土', '14:45', '15:30', 'スプリットヨガ', '★★★', '', '3日プロジェクターレッスン', 'magenta'],
-  ['土', '16:00', '17:00', 'ゆるめるストレッチヨガ', '★', '', '※10日ご予約済パーソナル', 'blue'],
+  ['土', '9:30', '10:15', 'からだ調整ヨガ', '★★', '', ''],
+  ['土', '10:45', '11:30', 'リフレッシュヨガ', '★', '', ''],
+  ['土', '12:15', '13:00', 'フローヨガ', '★★', '', ''],
+  ['土', '13:30', '14:15', 'ベーシックヨガ', '★', '', ''],
+  ['土', '14:45', '15:30', 'スプリットヨガ', '★★★', '', '3日プロジェクターレッスン'],
+  ['土', '16:00', '17:00', 'ゆるめるストレッチヨガ', '★', '', '※10日ご予約済パーソナル'],
 
-  ['日', '9:30', '10:15', '艶美ヨガ（要確認）', '★★★', '', '', 'magenta'],
-  ['日', '10:45', '11:45', 'ゼロコア', '★★', '', '', 'orange'],
-  ['日', '12:30', '13:15', 'リラックスヨガ', '★', '', '', 'blue'],
-  ['日', '13:45', '14:30', 'フローヨガ', '★★', '', '', 'orange'],
-  ['日', '15:00', '15:45', '快眠ヨガ', '★', '', '', 'blue'],
-  ['日', '16:15', '17:00', 'アンチエイジングヨガ', '★★', '', '', 'orange']
+  ['日', '9:30', '10:15', '艶美ヨガ（要確認）', '★★★', '', ''],
+  ['日', '10:45', '11:45', 'ゼロコア', '★★', '', ''],
+  ['日', '12:30', '13:15', 'リラックスヨガ', '★', '', ''],
+  ['日', '13:45', '14:30', 'フローヨガ', '★★', '', ''],
+  ['日', '15:00', '15:45', '快眠ヨガ', '★', '', ''],
+  ['日', '16:15', '17:00', 'アンチエイジングヨガ', '★★', '', '']
 ];
 
 const MONTH_NOTES = [
@@ -103,14 +93,12 @@ const STORE_SHEET_NAME = '月別データ（編集不要）';
 const STORE_WIDTH = 10;
 const VIEW_FIRST_ROW = 3;
 const VIEW_ROWS = 200;
-const LESSON_HEADERS = ['曜日', '開始', '終了', '分数', 'レッスン名', '強度', '定員', '備考', '色'];
+const LESSON_HEADERS = ['曜日', '開始', '終了', '分数', 'レッスン名', '強度', '定員', '備考'];
 const BLOCKED_COL = 12; // L
 const BLOCKED_HEADERS = ['日付', '曜日', '開始', '終了', '理由・表示文', 'LP掲載'];
 const NOTES_COL = 19; // S
 const NOTE_HEADERS = ['項目', '内容'];
 const WEEKDAY_ORDER = ['月', '火', '水', '木', '金', '土', '日'];
-const COLOR_LABELS = { orange: 'オレンジ', blue: '青', magenta: 'ピンク', green: '緑', gray: 'グレー', yellow: '黄' };
-
 const BLOCKED_SEED = [
   ['2026-10-05', '15:00', '16:00', ''],
   ['2026-10-05', '16:30', '17:30', ''],
@@ -154,16 +142,6 @@ function normDate_(s) {
 function normTime_(s) {
   const m = String(s || '').replace('：', ':').match(/(\d{1,2}):(\d{2})/);
   return m ? Number(m[1]) + ':' + m[2] : '';
-}
-
-function colorLabel_(v) {
-  return COLOR_LABELS[v] || String(v || '');
-}
-
-function colorKey_(v) {
-  const s = String(v || '').trim();
-  const key = Object.keys(COLOR_LABELS).filter(function(k) { return COLOR_LABELS[k] === s; })[0];
-  return key || s;
 }
 
 function withDocumentLock_(fn) {
@@ -240,7 +218,7 @@ function readViewRows_(sheet) {
   const checks = sheet.getRange(f, BLOCKED_COL + 5, VIEW_ROWS, 1).getValues();
   const rows = [];
   v.forEach(function(r) {
-    if (r[0] || r[1] || r[4]) rows.push(['lesson', r[0], r[1], r[2], r[4], r[5], r[6], r[7], r[8]]);
+    if (r[0] || r[1] || r[4]) rows.push(['lesson', r[0], r[1], r[2], r[4], r[5], r[6], r[7]]);
   });
   v.forEach(function(r, i) {
     const d = normDate_(r[BLOCKED_COL - 1]);
@@ -267,9 +245,9 @@ function writeView_(sheet, rows) {
 
   const lessons = pick('lesson');
   sheet.getRange(f, 1, n, 3).setValues(pad(lessons.map(function(v) { return [cell(v, 0), cell(v, 1), cell(v, 2)]; }), 3, ''));
-  sheet.getRange(f, 5, n, 5).setValues(pad(lessons.map(function(v) {
-    return [cell(v, 3), cell(v, 4), cell(v, 5), cell(v, 6), colorLabel_(cell(v, 7))];
-  }), 5, ''));
+  sheet.getRange(f, 5, n, 4).setValues(pad(lessons.map(function(v) {
+    return [cell(v, 3), cell(v, 4), cell(v, 5), cell(v, 6)];
+  }), 4, ''));
 
   const blocked = pick('blocked');
   sheet.getRange(f, BLOCKED_COL, n, 1).setValues(pad(blocked.map(function(v) {
@@ -336,16 +314,7 @@ function buildLessonView_(sheet) {
   sheet.getRange(f, 4, n, 1).setFontColor('#888888');
   sheet.getRange(f, 7, n, 1).setNumberFormat('0');
   sheet.getRange(f, 8, n, 1).setWrap(true);
-  const colorNames = Object.keys(COLOR_LABELS).map(function(k) { return COLOR_LABELS[k]; });
-  sheet.getRange(f, 9, n, 1).setDataValidation(
-    SpreadsheetApp.newDataValidation().requireValueInList(colorNames, true).setAllowInvalid(true).build());
-  const nameRange = sheet.getRange(f, 5, n, 1);
-  sheet.setConditionalFormatRules(Object.keys(COLOR_LABELS).map(function(k) {
-    return SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=$I' + f + '="' + COLOR_LABELS[k] + '"')
-      .setBackground(COLOR[k]).setFontColor(k === 'yellow' ? '#000000' : '#ffffff').setBold(true)
-      .setRanges([nameRange]).build();
-  }));
+  sheet.getRange(f, 5, n, 1).setFontWeight('bold');
 
   sheet.getRange(f, BLOCKED_COL, n, 1).setNumberFormat('yyyy/mm/dd')
     .setDataValidation(SpreadsheetApp.newDataValidation().requireDate().setAllowInvalid(false).build());
@@ -359,7 +328,7 @@ function buildLessonView_(sheet) {
   sheet.getRange(f, NOTES_COL, n, 2).setNumberFormat('@').setWrap(true).setVerticalAlignment('top');
 
   sheet.setFrozenRows(2);
-  [100, 60, 60, 50, 260, 60, 50, 320, 80, 20, 20, 100, 40, 60, 60, 240, 60, 20, 150, 380]
+  [100, 60, 60, 50, 260, 60, 50, 320, 20, 20, 20, 100, 40, 60, 60, 240, 60, 20, 150, 380]
     .forEach(function(w, i) { sheet.setColumnWidth(i + 1, w); });
 }
 
@@ -393,8 +362,7 @@ function ensureLessonSheetLayout_(ss) {
     if (isLessonViewReady_(ss)) return;
     const sheet = ss.getSheetByName(LESSON_SHEET_NAME) || ss.insertSheet(LESSON_SHEET_NAME);
     const store = getStoreSheet_(ss);
-    if (sheet.getRange(1, 1).getValue() === '対象月') migrateOldLayout_(sheet, store);
-    else if (!readStore_(store).length) seedStore_(store);
+    if (!readStore_(store).length) seedStore_(store);
     buildLessonView_(sheet);
     loadMonthIntoView_(sheet, store, currentMonthKey_());
     SpreadsheetApp.flush();
@@ -402,39 +370,10 @@ function ensureLessonSheetLayout_(ss) {
 }
 
 function seedStore_(store) {
-  const rows = LESSONS.map(function(l) { return ['lesson', l[0], l[1], l[2], l[3], l[4], l[5], l[6], colorLabel_(l[7])]; })
+  const rows = LESSONS.map(function(l) { return ['lesson'].concat(l); })
     .concat(BLOCKED_SEED.map(function(b) { return ['blocked', b[0], b[1], b[2], b[3], 'TRUE']; }))
     .concat(MONTH_NOTES.filter(function(n) { return n[0] !== '対象月'; }).map(function(n) { return ['note', n[0], n[1]]; }));
   writeStoreMonth_(store, LESSON_MONTH, rows);
-}
-
-/** 旧レイアウト（1行目見出し・A列 対象月）から月別データへ移行 */
-function migrateOldLayout_(sheet, store) {
-  const last = sheet.getLastRow();
-  if (last < 2) return;
-  const v = sheet.getRange(2, 1, last - 1, NOTES_COL + 1).getDisplayValues();
-  const checks = sheet.getRange(2, BLOCKED_COL + 5, last - 1, 1).getValues();
-  const hasBlocked = sheet.getRange(1, BLOCKED_COL).getValue() === '予約不可 日付';
-  const hasNotes = sheet.getRange(1, NOTES_COL).getValue() === '項目';
-  const byMonth = {};
-  const push = function(m, row) { (byMonth[m] = byMonth[m] || []).push(row); };
-  const lessonMonths = [];
-  const notes = [];
-
-  v.forEach(function(r, i) {
-    if (r[1] && r[5]) {
-      const m = monthKey_(r[0]) || LESSON_MONTH;
-      push(m, ['lesson', r[1], r[2], r[3], r[5], r[6], r[7], r[8], colorLabel_(r[9])]);
-      if (lessonMonths.indexOf(m) === -1) lessonMonths.push(m);
-    }
-    const d = hasBlocked ? normDate_(r[BLOCKED_COL - 1]) : '';
-    if (d) push(d.slice(0, 7), ['blocked', d, r[BLOCKED_COL + 1], r[BLOCKED_COL + 2], r[BLOCKED_COL + 3], checks[i][0] === true ? 'TRUE' : 'FALSE']);
-    if (hasNotes && r[NOTES_COL - 1] !== '対象月' && (r[NOTES_COL - 1] || r[NOTES_COL])) notes.push(['note', r[NOTES_COL - 1], r[NOTES_COL]]);
-  });
-  (lessonMonths.length ? lessonMonths : [LESSON_MONTH]).forEach(function(m) {
-    notes.forEach(function(n) { push(m, n); });
-  });
-  Object.keys(byMonth).forEach(function(m) { writeStoreMonth_(store, m, byMonth[m]); });
 }
 
 /* ---------- 月の切り替え・コピー ---------- */
@@ -523,8 +462,7 @@ function lessonsFrom_(rows) {
         name: String(r[5]).trim(),
         intensity: String(r[6] || ''),
         capacity: r[7] === '' || r[7] === undefined ? '' : Number(r[7]) || String(r[7]),
-        note: String(r[8] || ''),
-        color: colorKey_(r[9])
+        note: String(r[8] || '')
       };
     });
 }
