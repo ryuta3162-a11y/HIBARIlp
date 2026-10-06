@@ -118,15 +118,14 @@
                 radial-gradient(80% 70% at 0% -10%, rgba(64, 196, 176, 0.35) 0%, rgba(64, 196, 176, 0) 60%),
                 linear-gradient(160deg, #0c3b37 0%, #0a5a52 55%, #00766a 100%);
         }
-        .hero::after {
-            content: ''; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
-            width: 3rem; height: 2px; background: rgba(255, 255, 255, 0.5);
-        }
         .no-scrollbar { scrollbar-width: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .skeleton { background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
         @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-        .state-pill { display: inline-block; min-width: 4.5rem; text-align: center; font-size: 0.8rem; font-weight: 700; padding: 0.5rem 0.75rem; border-radius: 9999px; letter-spacing: 0.05em; }
+        .state-pill { display: inline-block; min-width: 3.5rem; text-align: center; font-size: 0.75rem; font-weight: 700; padding: 0.45rem 0.7rem; border-radius: 9999px; }
+        @media (max-width: 639px) {
+            .card { border-radius: 0; box-shadow: none; }
+        }
         .lesson-tab { transition: background-color .15s, border-color .15s, box-shadow .15s; }
         .lesson-tab:focus { outline: none; }
         .lesson-tab:focus-visible { box-shadow: 0 0 0 3px rgba(0, 131, 116, 0.3); }
@@ -143,20 +142,18 @@
 </head>
 <body class="text-gray-800">
 
-    <div class="min-h-screen container mx-auto p-4 sm:p-6 md:p-8">
+    <div class="min-h-screen container mx-auto p-0 sm:p-6 md:p-8">
         
         <div id="page-top" class="card max-w-2xl mx-auto">
-            <header class="hero text-white text-center px-6 pt-12 pb-10">
-                <p class="font-latin text-sm tracking-[0.35em] opacity-80">HOT YOGA &amp; PILATES</p>
-                <p class="text-[11px] tracking-[0.2em] opacity-70 mt-1">JOYFIT YOGA フレスポひばりが丘</p>
-                <h1 id="hero-title" class="font-serif-jp text-3xl sm:text-4xl font-bold mt-4 tracking-wider">レッスン予約</h1>
-                <p id="hero-lead" class="text-sm mt-4 opacity-90 leading-relaxed">日付を選んで、ご希望のレッスンをタップしてください</p>
+            <header class="hero text-white text-center px-4 py-8 font-serif-jp text-xl font-bold leading-relaxed tracking-wide">
+                <p class="opacity-80">JOYFIT YOGA フレスポひばりが丘</p>
+                <h1 id="hero-title">レッスン予約</h1>
             </header>
-            <div class="p-5 sm:p-8 text-center">
+            <div class="px-3 py-5 sm:p-8 text-center">
 
                 <!-- レッスン予約（スプレッドシート「レッスン一覧」「休講・変更」から取得） -->
                 <section id="lesson-schedule" class="text-left">
-                    <div class="mb-6 flex flex-col items-center gap-2 py-4 px-4 bg-[#fbf8f4] border border-[#efe7dc] rounded-2xl text-center">
+                    <div class="mb-4 flex flex-col items-center gap-1 text-center">
                         <span class="text-[11px] font-bold tracking-[0.2em] text-[#0a5a52]">レッスン強度</span>
                         <ul class="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-gray-700">
                             <li><span class="text-amber-500 tracking-tighter">★</span> 初級</li>
@@ -164,7 +161,7 @@
                             <li><span class="text-amber-500 tracking-tighter">★★★</span> 上級</li>
                         </ul>
                     </div>
-                    <div class="date-bar sticky top-0 z-30 bg-white/95 backdrop-blur -mx-5 sm:-mx-8 px-5 sm:px-8 pt-3 pb-3 border-b border-gray-100">
+                    <div class="date-bar sticky top-0 z-30 bg-white/95 backdrop-blur -mx-3 sm:-mx-8 px-3 sm:px-8 pt-3 pb-3 border-b border-gray-100">
                         <div class="flex items-center justify-between mb-2">
                             <p id="lesson-month-label" class="font-serif-jp text-base font-bold text-gray-800"></p>
                             <div class="flex gap-2">
@@ -826,16 +823,15 @@
                         else if (i.past) action = '<span class="state-pill bg-gray-100 text-gray-400">受付終了</span>';
                         else if (i.blocked) action = '<span class="state-pill bg-gray-100 text-gray-500">予約不可</span>';
                         else if (i.remaining === 0) action = '<span class="state-pill bg-red-50 text-red-600">満席</span>';
-                        else action = '<span class="state-pill bg-[#0a5a52] text-white shadow-sm">予約する</span>';
+                        else action = '<span class="state-pill bg-[#0a5a52] text-white shadow-sm">予約</span>';
                         return `
-                            <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-center gap-4 rounded-2xl border p-4 ${i.bookable ? 'bg-white border-gray-200 hover:shadow-[0_8px_24px_-12px_rgba(10,90,82,0.35)] hover:border-[#7cc4b8] active:scale-[0.99]' : 'bg-gray-50 border-gray-100 cursor-not-allowed'}">
-                                <div class="w-14 shrink-0 text-center ${i.bookable ? '' : 'opacity-50'}">
-                                    <p class="text-lg font-bold leading-tight tabular-nums ${cancelled ? 'line-through' : ''} ${i.bookable ? 'text-[#0a5a52]' : 'text-gray-500'}">${esc(i.start)}</p>
+                            <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-center gap-3 rounded-xl border px-3 py-3 ${i.bookable ? 'bg-white border-gray-200 hover:shadow-[0_8px_24px_-12px_rgba(10,90,82,0.35)] hover:border-[#7cc4b8] active:scale-[0.99]' : 'bg-gray-50 border-gray-100 cursor-not-allowed'}">
+                                <div class="w-11 shrink-0 text-center ${i.bookable ? '' : 'opacity-50'}">
+                                    <p class="text-base font-bold leading-tight tabular-nums ${cancelled ? 'line-through' : ''} ${i.bookable ? 'text-[#0a5a52]' : 'text-gray-500'}">${esc(i.start)}</p>
                                     <p class="text-[11px] text-gray-400">〜${esc(i.end)}</p>
                                 </div>
-                                <div class="w-px self-stretch bg-gray-200 shrink-0"></div>
                                 <div class="flex-1 min-w-0 ${i.bookable ? '' : 'opacity-60'}">
-                                    <p class="font-bold leading-snug ${cancelled ? 'line-through text-gray-500' : 'text-gray-800'}">${esc(i.name)}</p>
+                                    <p class="text-[14px] sm:text-base font-bold leading-snug ${cancelled ? 'line-through text-gray-500' : 'text-gray-800'}">${esc(i.name)}</p>
                                     <div class="flex flex-wrap items-center gap-1 mt-1">${i.intensity ? `<span class="text-amber-500 text-sm mr-1">${esc(i.intensity)}</span>` : ''}${tags}</div>
                                     ${i.message ? `<p class="text-xs text-red-600 mt-1">${esc(i.message)}</p>` : ''}
                                 </div>
@@ -1031,7 +1027,6 @@
             if (TRIAL_MODE) {
                 document.title = 'スタジオレッスン体験予約｜JOYFIT YOGA フレスポひばりが丘';
                 document.getElementById('hero-title').textContent = 'スタジオレッスン体験';
-                document.getElementById('hero-lead').textContent = 'ご希望のレッスンをタップすると、そのまま体験のお申し込みに進みます';
                 document.getElementById('form-menu').classList.add('hidden');
                 document.getElementById('book-hiatus').classList.add('hidden');
             }
