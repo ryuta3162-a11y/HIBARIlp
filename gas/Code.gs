@@ -38,7 +38,33 @@ function onOpen() {
   // メニュー名「★データ更新」を追加
   ui.createMenu('★データ更新')
     .addItem('全シートのデザイン・設定を最新にする', 'applyStyleToAllSheets')
+    .addItem('レッスン一覧を書き込む', 'importLessonList')
     .addToUi();
+
+  try {
+    importLessonListIfEmpty();
+    setupChangeSheetIfMissing();
+  } catch (e) {
+    console.error('レッスン一覧の自動書き込みに失敗: ' + e.toString());
+  }
+}
+
+/**
+ * doGet
+ * LPからのレッスンスケジュール取得（?action=lessons）
+ */
+function doGet(e) {
+  const action = e && e.parameter ? e.parameter.action : '';
+  let payload;
+  try {
+    payload = action === 'lessons'
+      ? getLessonData()
+      : { result: 'error', message: 'unknown action' };
+  } catch (error) {
+    payload = { result: 'error', message: error.message };
+  }
+  return ContentService.createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
