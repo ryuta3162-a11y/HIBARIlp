@@ -65,27 +65,17 @@ const LESSONS = [
 ];
 
 const MONTH_NOTES = [
-  ['対象月', '2026年10月'],
-  ['休館日', '9日(金)'],
-  ['特別スケジュール', '12日(月)は別紙をご確認ください'],
   ['営業時間（月〜木）', '9:30〜22:00'],
   ['営業時間（金）', '15:00〜21:30'],
-  ['営業時間（土日）', '9:00〜17:30'],
-  ['Aroma day（ラベンダー）', '8日(木)・10日(土)・15日(木)・19日(月)・25日(日)'],
-  ['強度', '★初級／★★中級／★★★上級'],
-  ['パーソナル', '要予約のリフォーマーパーソナルレッスンは、1週間前までにご予約が入らなければマシンピラティスグループレッスンへ変更になります。'],
-  ['他店舗会員', '他店舗会員様はマシンピラティスをご受講いただけません。'],
-  ['定休', '毎月第2金曜日は休館日です。変更がある月は店舗ホームページ「会員様へのお知らせ」にてご確認ください。'],
-  ['発券', 'レッスン開始20分前から5分前までにご来館いただき、発券をお済ませください。定員数が変更になるレッスンもございます。'],
-  ['リフォーマー環境', 'ピラティスリフォーマーレッスン時は温度低め・湿度低め設定です。']
+  ['営業時間（土日）', '9:00〜17:30']
 ];
 
 /* ===============================================================
  * レッスン一覧シート（月切り替え式）
  *  A1        : 表示月（プルダウン）。切り替えると表示中の内容を保存して別の月を読み込む
- *  A〜I列    : レッスン
+ *  A〜H列    : レッスン
  *  L〜Q列    : 予約不可 日程一覧
- *  S〜T列    : 概要・お知らせ
+ *  S〜T列    : 営業時間
  *  各月のデータは「月別データ」シート（非表示）に保存し、表示中の月だけはレッスン一覧が正
  * =============================================================== */
 
@@ -283,14 +273,14 @@ function buildLessonView_(sheet) {
     .setBorder(true, true, true, true, false, false, '#E0A800', SpreadsheetApp.BorderStyle.SOLID_MEDIUM)
     .setNote('表示する月を選びます。\n切り替える前の月の内容は自動で保存されます。');
   sheet.getRange('B1:I1').merge()
-    .setValue('◀ 月を選ぶと、その月のレッスン・予約不可日・概要に切り替わります（入力内容は自動保存）。' +
+    .setValue('◀ 月を選ぶと、その月のレッスン・予約不可日・営業時間に切り替わります（入力内容は自動保存）。' +
       '翌月分は「前月をコピー → 月を切り替え → 貼り付け」か、メニュー「★データ更新 → 前月のレッスンをこの月にコピー」で作成できます。')
     .setFontColor('#7F6000').setFontSize(10).setWrap(true).setVerticalAlignment('middle');
   sheet.getRange(1, BLOCKED_COL, 1, BLOCKED_HEADERS.length).merge()
     .setValue('予約不可 日程一覧（休館・貸切など WEB予約を止める日時）')
     .setBackground('#C0392B').setFontColor('#ffffff').setFontWeight('bold').setVerticalAlignment('middle');
   sheet.getRange(1, NOTES_COL, 1, 2).merge()
-    .setValue('概要・お知らせ（営業時間など）')
+    .setValue('営業時間（LPに表示）')
     .setBackground('#008374').setFontColor('#ffffff').setFontWeight('bold').setVerticalAlignment('middle');
   sheet.setRowHeight(1, 44);
 
@@ -372,7 +362,7 @@ function ensureLessonSheetLayout_(ss) {
 function seedStore_(store) {
   const rows = LESSONS.map(function(l) { return ['lesson'].concat(l); })
     .concat(BLOCKED_SEED.map(function(b) { return ['blocked', b[0], b[1], b[2], b[3], 'TRUE']; }))
-    .concat(MONTH_NOTES.filter(function(n) { return n[0] !== '対象月'; }).map(function(n) { return ['note', n[0], n[1]]; }));
+    .concat(MONTH_NOTES.map(function(n) { return ['note', n[0], n[1]]; }));
   writeStoreMonth_(store, LESSON_MONTH, rows);
 }
 
@@ -402,7 +392,7 @@ function switchLessonMonth_(ss, label) {
   });
 }
 
-/** メニュー：前月のレッスン・概要を表示中の月にコピー（予約不可日はコピーしない） */
+/** メニュー：前月のレッスン・営業時間を表示中の月にコピー（予約不可日はコピーしない） */
 function copyPreviousMonthLessons() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const ui = SpreadsheetApp.getUi();
