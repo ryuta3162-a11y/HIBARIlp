@@ -17,9 +17,10 @@
         }
         .font-serif-jp { font-family: 'Noto Serif JP', serif; }
         .font-latin { font-family: 'Cormorant Garamond', serif; }
-        .brand-teal { color: #008374; }
-        .bg-brand-teal { background-color: #008374; }
-        .hover\:bg-brand-teal-dark:hover { background-color: #006a5f; }
+        .brand-teal { color: #0C9090; }
+        .bg-brand-teal { background-color: #0C9090; }
+        .border-brand-teal { border-color: #0C9090; }
+        .hover\:bg-brand-teal-dark:hover { background-color: #0A7878; }
         
         /* フォームセクションの切り替えアニメーション */
         .form-section {
@@ -63,8 +64,8 @@
         }
         .form-input:focus {
             outline: none;
-            border-color: #008374;
-            box-shadow: 0 0 0 3px rgba(0, 131, 116, 0.2);
+            border-color: #0C9090;
+            box-shadow: 0 0 0 3px rgba(12, 144, 144, 0.2);
         }
         .form-input:disabled, .form-input[readonly] {
             background-color: #f3f4f6;
@@ -111,13 +112,7 @@
             border-color: #d1d5db;
         }
         #page-top { overflow: clip; }
-        .hero {
-            position: relative;
-            background:
-                radial-gradient(120% 90% at 100% 110%, rgba(255, 138, 76, 0.45) 0%, rgba(255, 138, 76, 0) 55%),
-                radial-gradient(80% 70% at 0% -10%, rgba(64, 196, 176, 0.35) 0%, rgba(64, 196, 176, 0) 60%),
-                linear-gradient(160deg, #0c3b37 0%, #0a5a52 55%, #00766a 100%);
-        }
+        .hero { background: #0C9090; }
         .no-scrollbar { scrollbar-width: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .skeleton { background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
@@ -128,9 +123,9 @@
         }
         .lesson-tab { transition: background-color .15s, border-color .15s, box-shadow .15s; }
         .lesson-tab:focus { outline: none; }
-        .lesson-tab:focus-visible { box-shadow: 0 0 0 3px rgba(0, 131, 116, 0.3); }
-        .lesson-tab:hover:not(.active) { border-color: #99d5cc; }
-        .lesson-tab.active { background: #0a5a52; color: #fff; border-color: #0a5a52; box-shadow: 0 6px 14px -6px rgba(10, 90, 82, 0.6); }
+        .lesson-tab:focus-visible { box-shadow: 0 0 0 3px rgba(12, 144, 144, 0.3); }
+        .lesson-tab:hover:not(.active) { border-color: #86C8C8; }
+        .lesson-tab.active { background: #0C9090; color: #fff; border-color: #0C9090; box-shadow: 0 6px 14px -6px rgba(12, 144, 144, 0.6); }
         .lesson-tab.active .tab-sub { color: #fff !important; }
         #lesson-day-tabs { scroll-behavior: smooth; cursor: grab; scroll-snap-type: x proximity; }
         #lesson-day-tabs.dragging { cursor: grabbing; scroll-behavior: auto; scroll-snap-type: none; }
@@ -154,7 +149,7 @@
                 <!-- レッスン予約（スプレッドシート「レッスン一覧」「休講・変更」から取得） -->
                 <section id="lesson-schedule" class="text-left">
                     <div class="mb-4 flex flex-col items-center gap-1 text-center">
-                        <span class="text-[11px] font-bold tracking-[0.2em] text-[#0a5a52]">レッスン強度</span>
+                        <span class="text-[11px] font-bold tracking-[0.2em] text-[#0C9090]">レッスン強度</span>
                         <ul class="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-gray-700">
                             <li><span class="text-amber-500 tracking-tighter">★</span> 初級</li>
                             <li><span class="text-amber-500 tracking-tighter">★★</span> 中級</li>
@@ -165,10 +160,10 @@
                         <div class="flex items-center justify-between mb-2">
                             <p id="lesson-month-label" class="font-serif-jp text-base font-bold text-gray-800"></p>
                             <div class="flex gap-2">
-                                <button type="button" id="tabs-prev" class="tabs-arrow w-8 h-8 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-[#0a5a52] hover:text-[#0a5a52] flex items-center justify-center" aria-label="前の日付">
+                                <button type="button" id="tabs-prev" class="tabs-arrow w-8 h-8 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-[#0C9090] hover:text-[#0C9090] flex items-center justify-center" aria-label="前の日付">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                                 </button>
-                                <button type="button" id="tabs-next" class="tabs-arrow w-8 h-8 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-[#0a5a52] hover:text-[#0a5a52] flex items-center justify-center" aria-label="次の日付">
+                                <button type="button" id="tabs-next" class="tabs-arrow w-8 h-8 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-[#0C9090] hover:text-[#0C9090] flex items-center justify-center" aria-label="次の日付">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                                 </button>
                             </div>
@@ -192,7 +187,7 @@
                         <div class="mt-5 space-y-3">
                             <button type="button" id="book-trial" class="w-full font-bold py-4 rounded-xl bg-brand-teal text-white hover:bg-brand-teal-dark disabled:opacity-40 disabled:cursor-not-allowed">初めての方（体験予約）</button>
                             <p id="book-trial-reason" class="hidden text-xs text-red-600 -mt-2"></p>
-                            <button type="button" id="book-hiatus" class="w-full font-bold py-4 rounded-xl bg-white border-2 border-brand-teal brand-teal hover:bg-teal-50 disabled:opacity-40 disabled:cursor-not-allowed">休会中の方（1回受講予約）</button>
+                            <button type="button" id="book-hiatus" class="w-full font-bold py-4 rounded-xl bg-white border-2 border-brand-teal brand-teal hover:bg-[#E7F4F4] disabled:opacity-40 disabled:cursor-not-allowed">休会中の方（1回受講予約）</button>
                             <p id="book-hiatus-reason" class="hidden text-xs text-red-600 -mt-2"></p>
                             <button type="button" id="book-close" class="w-full py-3 text-gray-500">閉じる</button>
                         </div>
@@ -203,7 +198,7 @@
                     <p class="font-latin text-xs tracking-[0.35em] text-gray-400">PROCEDURES</p>
                     <h3 class="font-serif-jp text-lg font-bold text-gray-800 mt-1 mb-5">各種お手続き</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-                        <button data-form="form-pilates" class="menu-button sm:col-span-2 w-full flex items-center justify-between gap-3 py-4 px-5 rounded-xl bg-[#0a5a52] text-white font-bold">
+                        <button data-form="form-pilates" class="menu-button sm:col-span-2 w-full flex items-center justify-between gap-3 py-4 px-5 rounded-xl bg-[#0C9090] text-white font-bold">
                             <span>マシンピラティス パーソナル予約</span><span aria-hidden="true">›</span>
                         </button>
                         <button data-form="form-cancel" class="menu-button w-full flex items-center justify-between gap-3 py-4 px-5 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold">
@@ -815,7 +810,7 @@
                         const minutes = timeKey(i.end) - timeKey(i.start);
                         const tags = [
                             minutes > 0 ? `<span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${minutes}分</span>` : '',
-                            i.remaining !== null && i.bookable ? `<span class="text-[11px] px-2 py-0.5 rounded-full ${i.remaining <= 2 ? 'bg-orange-100 text-orange-700 font-bold' : 'bg-teal-50 text-teal-700'}">残り${i.remaining}名</span>` : '',
+                            i.remaining !== null && i.bookable ? `<span class="text-[11px] px-2 py-0.5 rounded-full ${i.remaining <= 2 ? 'bg-orange-100 text-orange-700 font-bold' : 'bg-[#E7F4F4] text-[#0C9090]'}">残り${i.remaining}名</span>` : '',
                             badge
                         ].join('');
                         let action;
@@ -823,11 +818,11 @@
                         else if (i.past) action = '<span class="state-pill bg-gray-100 text-gray-400">受付終了</span>';
                         else if (i.blocked) action = '<span class="state-pill bg-gray-100 text-gray-500">予約不可</span>';
                         else if (i.remaining === 0) action = '<span class="state-pill bg-red-50 text-red-600">満席</span>';
-                        else action = '<span class="state-pill bg-[#0a5a52] text-white shadow-sm">予約</span>';
+                        else action = '<span class="state-pill bg-[#0C9090] text-white shadow-sm">予約</span>';
                         return `
-                            <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-center gap-3 rounded-xl border px-3 py-3 ${i.bookable ? 'bg-white border-gray-200 hover:shadow-[0_8px_24px_-12px_rgba(10,90,82,0.35)] hover:border-[#7cc4b8] active:scale-[0.99]' : 'bg-gray-50 border-gray-100 cursor-not-allowed'}">
+                            <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-center gap-3 rounded-xl border px-3 py-3 ${i.bookable ? 'bg-white border-gray-200 hover:shadow-[0_8px_24px_-12px_rgba(12,144,144,0.35)] hover:border-[#86C8C8] active:scale-[0.99]' : 'bg-gray-50 border-gray-100 cursor-not-allowed'}">
                                 <div class="w-11 shrink-0 text-center ${i.bookable ? '' : 'opacity-50'}">
-                                    <p class="text-base font-bold leading-tight tabular-nums ${cancelled ? 'line-through' : ''} ${i.bookable ? 'text-[#0a5a52]' : 'text-gray-500'}">${esc(i.start)}</p>
+                                    <p class="text-base font-bold leading-tight tabular-nums ${cancelled ? 'line-through' : ''} ${i.bookable ? 'text-[#0C9090]' : 'text-gray-500'}">${esc(i.start)}</p>
                                     <p class="text-[11px] text-gray-400">〜${esc(i.end)}</p>
                                 </div>
                                 <div class="flex-1 min-w-0 ${i.bookable ? '' : 'opacity-60'}">
