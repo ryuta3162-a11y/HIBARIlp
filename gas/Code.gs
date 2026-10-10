@@ -37,9 +37,7 @@ function onOpen() {
   const ui = SpreadsheetApp.getUi();
   // メニュー名「★データ更新」を追加
   ui.createMenu('★データ更新')
-    .addItem('全シートのデザイン・設定を最新にする', 'applyStyleToAllSheets')
-    .addItem('前月のレッスンをこの月にコピー', 'copyPreviousMonthLessons')
-    .addToUi();
+    .addItem('全シートのデザイン・設定を最新にする', 'applyStyleToAllSheets')    .addToUi();
 
   try {
     setupChangeSheetIfMissing();
