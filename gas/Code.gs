@@ -129,7 +129,7 @@ function doPost(e) {
       }
     }
 
-    // v2予約ページからの予約（lesson_slot付き）は定員チェックを行う
+    // v2予約ページからの予約（lesson_slot付き）は受付期間・予約不可をチェックする
     let lock = null;
     if (params.lesson_slot) {
       lock = LockService.getScriptLock();
@@ -142,11 +142,6 @@ function doPost(e) {
       if (isSlotBlocked_(spreadsheet, params.lesson_slot)) {
         lock.releaseLock();
         throw new Error('選択された日時はご予約いただけません。別のレッスンをお選びください。');
-      }
-      const full = isSlotFull_(spreadsheet, params.lesson_slot);
-      if (full) {
-        lock.releaseLock();
-        throw new Error('選択されたレッスンは満席のため、ご予約できませんでした。別のレッスンをお選びください。');
       }
     }
 

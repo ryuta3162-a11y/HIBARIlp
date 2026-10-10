@@ -183,7 +183,6 @@
                     <div class="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl p-6 text-left">
                         <p class="text-xs text-gray-500">選択中のレッスン</p>
                         <p id="booking-lesson-label" class="font-serif-jp font-bold text-lg text-gray-800 mt-1"></p>
-                        <p id="booking-lesson-note" class="text-xs text-orange-600 font-bold mt-1"></p>
                         <div class="mt-5 space-y-3">
                             <button type="button" id="book-trial" class="w-full font-bold py-4 rounded-xl bg-brand-teal text-white hover:bg-brand-teal-dark disabled:opacity-40 disabled:cursor-not-allowed">初めての方（体験予約）</button>
                             <p id="book-trial-reason" class="hidden text-xs text-red-600 -mt-2"></p>
@@ -755,7 +754,7 @@
 
                 changes.forEach(c => {
                     if (c.type === '追加') {
-                        items.push({ start: c.newStart, end: c.newEnd, name: c.newName, intensity: '', capacity: '', status: '追加', message: c.message });
+                        items.push({ start: c.newStart, end: c.newEnd, name: c.newName, intensity: '', status: '追加', message: c.message });
                         return;
                     }
                     if (!c.target) return;
@@ -767,16 +766,23 @@
                     if (c.type === 'レッスン変更') { item.status = '変更'; item.name = c.newName || item.name; }
                     if (c.type === '代行') item.status = '代行';
                 });
+                const dayBlocks = (data.blocked || []).filter(b => b.date === dateStr);
+                dayBlocks.filter(b => b.type && b.start).forEach(b => {
+                    const s = timeKey(b.start), e = b.end ? timeKey(b.end) : s + 1;
+                    items.filter(i => i.status !== '時間変更' && timeKey(i.start) >= s && timeKey(i.start) < e).forEach(i => {
+                        if (b.message) i.message = b.message;
+                        if (b.type === '休講') i.status = '休講';
+                        if (b.type === '時間変更') { i.status = '時間変更'; i.start = b.newStart || i.start; i.end = b.newEnd || i.end; }
+                    });
+                });
                 items.sort((a, b) => timeKey(a.start) - timeKey(b.start));
 
-                const blocks = (data.blocked || []).filter(b => b.date === dateStr);
-                const dayBlock = blocks.find(b => !b.start);
+                const blocks = dayBlocks.filter(b => !b.type);
+                const dayBlock = blocks.find(b => !b.start) || dayBlocks.find(b => b.type === '休講' && !b.start);
                 const isToday = dateStr === data.today;
                 items.forEach(i => {
                     i.date = dateStr;
                     i.slot = `${dateStr} ${i.start}`;
-                    const booked = (data.bookings && data.bookings[i.slot]) || 0;
-                    i.remaining = typeof i.capacity === 'number' ? Math.max(i.capacity - booked, 0) : null;
                     i.past = isToday && timeKey(i.start) <= nowMinutes();
                     const block = dayBlock || blocks.find(b => {
                         const s = timeKey(b.start), e = b.end ? timeKey(b.end) : 24 * 60, t = timeKey(i.start);
@@ -784,7 +790,7 @@
                     });
                     i.blocked = !!block;
                     if (block && block.message && !i.message) i.message = block.message;
-                    i.bookable = !closed && i.status !== '休講' && !i.past && !i.blocked && i.remaining !== 0;
+                    i.bookable = !closed && i.status !== '休講' && !i.past && !i.blocked;
                 });
                 return { day, closed, dayBlock, notices, items, hasMonth: data.lessons.some(l => l.month === month) };
             }
@@ -810,14 +816,12 @@
                         const minutes = timeKey(i.end) - timeKey(i.start);
                         const tags = [
                             minutes > 0 ? `<span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${minutes}分</span>` : '',
-                            i.remaining !== null && i.bookable ? `<span class="text-[11px] px-2 py-0.5 rounded-full ${i.remaining <= 2 ? 'bg-orange-100 text-orange-700 font-bold' : 'bg-[#E7F4F4] text-[#0C9090]'}">残り${i.remaining}名</span>` : '',
                             badge
                         ].join('');
                         let action;
                         if (cancelled) action = '<span class="state-pill bg-gray-100 text-gray-500">休講</span>';
                         else if (i.past) action = '<span class="state-pill bg-gray-100 text-gray-400">受付終了</span>';
                         else if (i.blocked) action = '<span class="state-pill bg-gray-100 text-gray-500">予約不可</span>';
-                        else if (i.remaining === 0) action = '<span class="state-pill bg-red-50 text-red-600">満席</span>';
                         else action = '<span class="state-pill bg-[#0C9090] text-white shadow-sm">予約</span>';
                         return `
                             <button type="button" data-idx="${idx}" ${i.bookable ? '' : 'disabled'} class="lesson-item w-full text-left flex items-center gap-3 rounded-xl border px-3 py-3 ${i.bookable ? 'bg-white border-gray-200 hover:shadow-[0_8px_24px_-12px_rgba(12,144,144,0.35)] hover:border-[#86C8C8] active:scale-[0.99]' : 'bg-gray-50 border-gray-100 cursor-not-allowed'}">
@@ -872,7 +876,6 @@
                     return;
                 }
                 document.getElementById('booking-lesson-label').textContent = lessonDisplay(lesson);
-                document.getElementById('booking-lesson-note').textContent = lesson.remaining !== null ? `残り${lesson.remaining}名` : '';
                 document.getElementById('booking-sheet').classList.remove('hidden');
             }
 
