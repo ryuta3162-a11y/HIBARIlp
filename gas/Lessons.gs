@@ -214,7 +214,7 @@ function readViewRows_(sheet) {
   v.forEach(function(r, i) {
     const b = r.slice(BLOCKED_COL - 1);
     const d = normDate_(b[0]);
-    if (d) rows.push(['blocked', d, b[3], b[4], b[7], checks[i][0] === true ? 'TRUE' : 'FALSE', b[2], b[5], b[6]]);
+    if (d) rows.push(['blocked', d, b[3], b[4], b[7], String(checks[i][0]).toUpperCase() === 'TRUE' ? 'TRUE' : 'FALSE', b[2], b[5], b[6]]);
   });
   v.forEach(function(r) {
     if (r[NOTES_COL - 1] || r[NOTES_COL]) rows.push(['note', r[NOTES_COL - 1], r[NOTES_COL]]);
@@ -319,7 +319,7 @@ function buildLessonView_(sheet) {
   sheet.getRange(f, BLOCKED_COL + 2, n, 1).setDataValidation(
     SpreadsheetApp.newDataValidation().requireValueInList(BLOCKED_TYPES, true).setAllowInvalid(false).build());
   sheet.getRange(f, BLOCKED_COL + 3, n, 4).setNumberFormat('@');
-  sheet.getRange(f, BLOCKED_COL + 8, n, 1).insertCheckboxes();
+  sheet.getRange(f, BLOCKED_COL + 8, n, 1).setNumberFormat('General').insertCheckboxes();
   sheet.getRange(f, BLOCKED_COL, n, BLOCKED_HEADERS.length).setBackground('#FDF2F2');
 
   sheet.setConditionalFormatRules([
