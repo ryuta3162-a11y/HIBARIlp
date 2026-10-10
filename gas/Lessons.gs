@@ -316,7 +316,7 @@ function buildSlot_(sheet, slot, rules) {
   const last = f + n - 1;
   const headColor = slot === 0 ? '#0C9090' : '#3D6FB6';
 
-  sheet.getRange(top, 1).setNumberFormat('@').setFontSize(13).setFontWeight('bold')
+  sheet.getRange(top, 1).setNumberFormat('@').setFontSize(10).setFontWeight('bold')
     .setBackground('#FFF2CC').setHorizontalAlignment('center').setVerticalAlignment('middle')
     .setBorder(true, true, true, true, false, false, '#E0A800', SpreadsheetApp.BorderStyle.SOLID_MEDIUM)
     .setNote('表示する月を選びます。\n切り替える前の月の内容は自動で保存されます。');
