@@ -762,19 +762,20 @@
                     if (!item) return;
                     item.message = c.message;
                     if (c.type === '休講') item.status = '休講';
-                    if (c.type === '時間変更') { item.status = '時間変更'; item.start = c.newStart || item.start; item.end = c.newEnd || item.end; }
+                    if (c.type === '時間変更') { item.moved = true; item.start = c.newStart || item.start; item.end = c.newEnd || item.end; }
                     if (c.type === 'レッスン変更') { item.status = '変更'; item.name = c.newName || item.name; }
                     if (c.type === '代行') item.status = '代行';
                 });
                 const dayBlocks = (data.blocked || []).filter(b => b.date === dateStr);
                 dayBlocks.filter(b => b.type && b.start).forEach(b => {
                     const s = timeKey(b.start), e = b.end ? timeKey(b.end) : s + 1;
-                    items.filter(i => i.status !== '時間変更' && timeKey(i.start) >= s && timeKey(i.start) < e).forEach(i => {
+                    items.filter(i => !i.moved && timeKey(i.start) >= s && timeKey(i.start) < e).forEach(i => {
                         if (b.message) i.message = b.message;
                         if (b.type === '休講') i.status = '休講';
-                        if (b.type === '時間変更') { i.status = '時間変更'; i.start = b.newStart || i.start; i.end = b.newEnd || i.end; }
+                        if (b.type === '時間変更') { i.moved = true; i.start = b.newStart || i.start; i.end = b.newEnd || i.end; }
                     });
                 });
+                items = items.filter(i => i.status !== '休講');
                 items.sort((a, b) => timeKey(a.start) - timeKey(b.start));
 
                 const blocks = dayBlocks.filter(b => !b.type);
